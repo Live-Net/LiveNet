@@ -43,8 +43,12 @@ class Environment:
     def get_dynamics(x):
         if config.dynamics == DynamicsModel.SINGLE_INTEGRATOR:
             return Environment.get_single_integrator_dynamics(x)
-        else:
+        elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
             return Environment.get_double_integrator_dynamics(x)
+        elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+            return Environment.get_double_integrator_dynamics_macbf(x)
+        else:
+            raise ValueError("Unsupported DynamicsModel selected.")
 
     """Defines the system input matrices A and B for single-integrator dynamics."""
     @staticmethod
@@ -77,6 +81,38 @@ class Environment:
         a = 1e-9  # Small positive constant so system has relative degree 1
         B[0, 1] = -a*sin(x[2])
         B[1, 1] = a*cos(x[2])
+        return A, B
+    
+    @staticmethod
+    def get_double_integrator_dynamics_macbf(x):
+        """
+        Defines the system input matrices A and B for double-integrator dynamics with separate velocity components.
+
+        State Vector: [x, y, vx, vy]
+        Action Vector: [ax, ay]
+
+        Dynamics:
+            x_{k+1} = x_k + vx_k * T_s + 0.5 * ax_k * T_s^2
+            y_{k+1} = y_k + vy_k * T_s + 0.5 * ay_k * T_s^2
+            vx_{k+1} = vx_k + ax_k * T_s
+            vy_{k+1} = vy_k + ay_k * T_s
+        """
+        T_s = config.sim_ts
+
+        A = SX.zeros(config.num_states, 1)
+        A[0] = x[2] * T_s
+        A[1] = x[3] * T_s
+        # A[2] and A[3] remain zero as they are directly influenced by control inputs
+
+        # Define B matrix (control influence)
+        B = SX.zeros(config.num_states, config.num_controls)
+
+        # Should be included but dynamics were not part of macbf training. 
+        # B[0, 0] = 0.5 * T_s**2  # Influence of ax on x 
+        # B[1, 1] = 0.5 * T_s**2  # Influence of ay on y
+
+        B[2, 0] = T_s           # Influence of ax on vx
+        B[3, 1] = T_s           # Influence of ay on vy
         return A, B
 
     """Configures the simulator."""

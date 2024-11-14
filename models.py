@@ -27,6 +27,7 @@ ANGULAR_VEL_IDX = 0
 LINEAR_ACCEL_IDX = 1
 
 
+
 class BarrierNet(nn.Module):
     # Input features: 8. [ego x, ego y, ego theta, ego v, opp x, opp y, opp theta, opp v]
     # Output controls: 2. [linear vel, angular vel].
