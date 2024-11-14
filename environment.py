@@ -44,8 +44,12 @@ class Environment:
     def get_dynamics(x):
         if config.dynamics == DynamicsModel.SINGLE_INTEGRATOR:
             return Environment.get_single_integrator_dynamics(x)
-        else:
+        elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
             return Environment.get_double_integrator_dynamics(x)
+        elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+            return Environment.get_double_integrator_dynamics_macbf(x)
+        else:
+            raise ValueError("Unsupported DynamicsModel selected.")
 
     """Defines the system input matrices A and B for single-integrator dynamics."""
     @staticmethod
@@ -79,6 +83,37 @@ class Environment:
         B[0, 1] = -a*sin(x[2])
         B[1, 1] = a*cos(x[2])
         return A, B
+    
+    @staticmethod
+    def get_double_integrator_dynamics_macbf(x):
+        """
+        Defines the system input matrices A and B for double-integrator dynamics with separate velocity components.
+
+        State Vector: [x, y, vx, vy]
+        Action Vector: [ax, ay]
+
+        Dynamics:
+            x_{k+1} = x_k + vx_k * T_s + 0.5 * ax_k * T_s^2
+            y_{k+1} = y_k + vy_k * T_s + 0.5 * ay_k * T_s^2
+            vx_{k+1} = vx_k + ax_k * T_s
+            vy_{k+1} = vy_k + ay_k * T_s
+        """
+
+        A = SX.zeros(config.num_states, 1)
+        A[0] = x[2]
+        A[1] = x[3]
+        # A[2] and A[3] remain zero as they are directly influenced by control inputs
+
+        # Define B matrix (control influence)
+        B = SX.zeros(config.num_states, config.num_controls)
+
+        # Should be included but dynamics were not part of macbf training. 
+        # B[0, 0] = 0.5 * T_s**2  # Influence of ax on x 
+        # B[1, 1] = 0.5 * T_s**2  # Influence of ay on y
+
+        B[2, 0] = 1           # Influence of ax on vx
+        B[3, 1] = 1           # Influence of ay on vy
+        return A, B
 
     """Configures the simulator."""
     def define_simulator(self):
@@ -111,6 +146,25 @@ class Environment:
             control[1] = -config.accel_limit
         return control
 
+    def apply_state_lims_macbf(self, state):
+        # v = np.lianlg.norm(state[2:4])
+        # if v > config.v_limit:
+        #     division = v / config.v_limit
+        #     state[2] /= division
+        #     state[3] /= division
+        return state
+
+    def apply_control_lims_macbf(self, control):
+        # if control[0] > config.omega_limit:
+        #     control[0] = config.omega_limit
+        # if control[0] < -config.omega_limit:
+        #     control[0] = -config.omega_limit
+        # if control[1] > config.accel_limit:
+        #     control[1] = config.accel_limit
+        # if control[1] < -config.accel_limit:
+        #     control[1] = -config.accel_limit
+        return control
+
     # @profile
     def run_simulation(self, sim_iteration, controllers, logger):
         """Runs a closed-loop control simulation."""
@@ -131,9 +185,16 @@ class Environment:
                 opp_state = np.append(opp_state, [opp_vel])
             self.reset_state(initial_state)
             controller.reset_state(initial_state, opp_state)
-            u1 = self.apply_control_lims(controller.make_step(sim_time, initial_state))
+            
+
+            u1 = controller.make_step(sim_time, initial_state)
+            # u1 = self.apply_control_lims(controller.make_step(sim_time, initial_state))
+
+
             x1 = self.simulator.make_step(u1)
-            new_states[agent_idx, :] = self.apply_state_lims(x1.ravel())
+            print(initial_state, u1.ravel(), x1.ravel())
+            # new_states[agent_idx, :] = self.apply_state_lims(x1.ravel())
+            new_states[agent_idx, :] = x1.ravel()
             outputted_controls[agent_idx, :] = u1.ravel()
             # print(f"Initial state: {initial_state}, Output control: {outputted_controls[agent_idx, :]}, New state: {new_states[agent_idx, :]}")
             use_for_training.append(controller.use_for_training)

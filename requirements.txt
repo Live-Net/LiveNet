@@ -6,3 +6,5 @@ numpy
 pandas
 scipy
 seaborn
+qpth
+torch

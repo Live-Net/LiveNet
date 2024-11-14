@@ -14,10 +14,12 @@ def run_simulation(scenario, env, controllers, logger, plotter):
 
     for sim_iteration in range(int(config.runtime / config.sim_ts)):
         for agent_idx in range(config.n):
+            
             x_cum[agent_idx].append(env.initial_states[agent_idx])
 
         if plotter is not None:
             metrics.append(calculate_all_metrics(x_cum[0][-1], x_cum[1][-1], config.liveness_threshold))
+
         new_states, outputted_controls = env.run_simulation(sim_iteration, controllers, logger)
 
         for agent_idx in range(config.n):

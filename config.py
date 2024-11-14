@@ -8,6 +8,7 @@ from enum import Enum, auto
 class DynamicsModel(Enum):
     SINGLE_INTEGRATOR = auto()
     DOUBLE_INTEGRATOR = auto()
+    DOUBLE_INTEGRATOR_MACBF = auto()
 
 # Liveness parameters.
 liveliness = True
@@ -16,27 +17,44 @@ plot_rate = 1
 plot_live = True
 plot_live_pause_iteration = None
 # plot_live_pause_iteration = 0
-# plot_live_pause_iteration = 35
+# plot_live_pause_iteration = 85
 plot_arrows = False
 plot_end = False
 plot_end_ani_only = False
 ani_save_name = 'base_barriernet_model.mp4'
 
+# dynamics = DynamicsModel.SINGLE_INTEGRATOR
 dynamics = DynamicsModel.DOUBLE_INTEGRATOR
+# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
+
 mpc_p0_faster = True
 agent_zero_offset = 0
 consider_intersects = True
 
 if dynamics == DynamicsModel.SINGLE_INTEGRATOR:
-    num_states = 3 # (x, y, theta)
-    num_controls = 2 # (v, omega)
+    num_states = 3  # [x, y, theta]
+    num_controls = 2  # (v, omega)
+elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
+    num_states = 4  # [x, y, theta, v]
+    num_controls = 2  # (a, omega)
+elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+    num_states = 4  # [x, y, vx, vy]
+    num_controls = 2  # [ax, ay]
 else:
-    num_states = 4 # (x, y, theta, v)
-    num_controls = 2 # (a, omega)
+    raise ValueError("Unsupported DynamicsModel selected.")
+
+num_states = num_states
+num_controls = num_controls
+
 
 n = 2                                      # Number of agents
 runtime = 20.0                             # Total runtime [s]
-sim_ts = 0.2                                # Simulation Sampling time [s]
+
+if dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+    sim_ts = 0.1
+else:
+    sim_ts = 0.2                                # Simulation Sampling time [s]
+
 MPC_Ts = 0.1                                   # MPC Sampling time [s]
 T_horizon = 6                              # Prediction horizon time steps
 
@@ -132,7 +150,17 @@ separate_penalty_for_opp = False # SHOULDNT NEED THIS HOPEFULLY
 train_batch_size = 32
 # train_batch_size = 1
 use_cuda = torch.cuda.is_available()
+
 device = torch.device("cuda" if use_cuda else "cpu")
+
+''' In order to use MPS, change all .double() to float() '''
+# device = torch.device(
+#     "cuda" if torch.cuda.is_available() else
+#     "mps" if torch.backends.mps.is_available() else
+#     "cpu"
+# )
+
+
 learning_rate = 1e-3
 epochs = 30
 nHidden1 = 256

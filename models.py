@@ -26,6 +26,7 @@ ANGULAR_VEL_IDX = 0
 LINEAR_ACCEL_IDX = 1
 
 
+
 class BarrierNet(nn.Module):
     # Input features: 8. [ego x, ego y, ego theta, ego v, opp x, opp y, opp theta, opp v]
     # Output controls: 2. [linear vel, angular vel].
@@ -60,12 +61,11 @@ class BarrierNet(nn.Module):
             self.fc34 = nn.Linear(model_definition.nHidden24, 2).double()
 
         if model_definition.add_control_limits:
-            self.s0 = Parameter(torch.ones(1).cuda()).to(config.device)
-            self.s1 = Parameter(torch.ones(1).cuda()).to(config.device)
-            self.s2 = Parameter(torch.ones(1).cuda()).to(config.device)
-            self.s3 = Parameter(torch.ones(1).cuda()).to(config.device)
+            self.s0 = Parameter(torch.ones(1).to(config.device)).to(config.device)
+            self.s1 = Parameter(torch.ones(1).to(config.device)).to(config.device)
+            self.s2 = Parameter(torch.ones(1).to(config.device)).to(config.device)
+            self.s3 = Parameter(torch.ones(1).to(config.device)).to(config.device)
             
-
     def forward(self, x, sgn):
         nBatch = x.size(0)
 

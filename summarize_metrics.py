@@ -2,7 +2,8 @@ import config
 import numpy as np
 
 AGENT = 'MPC'
-SCENARIO = 'Doorway'
+SCENARIO = 'Intersection'
+
 metrics = np.loadtxt(f'experiment_results/{AGENT}_{SCENARIO}.csv', delimiter=',')
 
 IDXS = {
