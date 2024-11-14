@@ -106,13 +106,14 @@ def check_intersection(ego_pos, opp_pos, ego_vel, opp_vel):
     return u > 0 and v > 0
 
 
-def calculate_all_metrics(ego_state, opp_state, liveness_thresh):
+def calculate_all_metrics(ego_state, opp_state, liveness_thresh):    
     ego_vel_vec = np.array([np.cos(ego_state[2]), np.sin(ego_state[2])]) * ego_state[3]
     opp_vel_vec = np.array([np.cos(opp_state[2]), np.sin(opp_state[2])]) * opp_state[3]
     l, ttc, pos_diff, vel_diff = calculate_liveliness(ego_state[:2], opp_state[:2], ego_vel_vec, opp_vel_vec)
 
     intersecting = check_intersection(ego_state[:2], opp_state[:2], ego_vel_vec, opp_vel_vec)
 
+    
     is_live = False
     if config.consider_intersects:
         if l > liveness_thresh or not intersecting:

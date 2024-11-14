@@ -20,6 +20,7 @@ from plotter import Plotter
 # SCENARIO = 'Doorway'
 SCENARIO = 'Intersection'
 
+SCENARIO = 'Intersection'
 RUN_AGENT = 'MPC'
 # RUN_AGENT = 'MPC_UNLIVE'
 # RUN_AGENT = 'BarrierNet'
@@ -63,6 +64,14 @@ def get_mpc_unlive_controllers(scenario):
     controllers = [
         MPC(agent_idx=0, opp_gamma=config.opp_gamma, obs_gamma=config.obs_gamma, live_gamma=config.liveliness_gamma, liveness_thresh=config.liveness_threshold, goal=scenario.goals[0,:].copy(), static_obs=scenario.obstacles.copy()),
         MPC(agent_idx=1, opp_gamma=config.opp_gamma, obs_gamma=config.obs_gamma, live_gamma=config.liveliness_gamma, liveness_thresh=config.liveness_threshold, goal=scenario.goals[1,:].copy(), static_obs=scenario.obstacles.copy())
+    ]
+    return controllers
+
+
+def get_macbf_controllers(scenario):
+    controllers = [
+        macbf_torch_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
+        macbf_torch_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:])
     ]
     return controllers
 
@@ -122,6 +131,8 @@ if __name__ == '__main__':
         env = Environment(scenario.initial.copy(), scenario.goals.copy())
         if RUN_AGENT == 'MPC':
             controllers = get_mpc_live_controllers(scenario, True)
+        elif RUN_AGENT == 'MACBF':
+            controllers = get_macbf_controllers(scenario)
         elif RUN_AGENT == 'MPC_UNLIVE':
             controllers = get_mpc_unlive_controllers(scenario)
         elif RUN_AGENT == 'BarrierNet':

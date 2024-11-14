@@ -100,11 +100,17 @@ class NoObstacleDoorwayScenario:
 
 class IntersectionScenario:
     def __init__(self, start=1.0, goal=1.0, start_vel=0.0):
-        self.initial = np.array([[0.0, -start, np.pi / 2, start_vel],
-                      [-start, 0.0, 0.0, start_vel]])
+
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+            self.initial = np.array([[0.0, -1.0, np.cos(np.pi / 2)*start_vel, np.sin(np.pi / 2)*start_vel],
+                                    [-1.0, 0.0, np.cos(0.0)*start_vel, np.sin(0.0)*start_vel]])
+        else:
+            self.initial = np.array([[0.0, -start, np.pi / 2, start_vel],
+                        [-start, 0.0, 0.0, start_vel]])
+        
         self.goals = np.array([[0.0, goal, np.pi / 2, 0.0],
-                    [goal, 0.0, 0.0, 0.0]
-                    ])
+                    [goal, 0.0, 0.0, 0.0]])
+        
         self.config = (start, goal, start_vel)
         self.ox=-0.3
         self.ox1=0.3
