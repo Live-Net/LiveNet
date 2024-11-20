@@ -8,6 +8,7 @@ class DynamicsModel(Enum):
     SINGLE_INTEGRATOR = auto()
     DOUBLE_INTEGRATOR = auto()
     DOUBLE_INTEGRATOR_MACBF = auto()
+    INFORMARL = auto()
 
 # Liveness parameters.
 liveliness = True
@@ -36,6 +37,9 @@ elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
 elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
     num_states = 4  # [x, y, vx, vy]
     num_controls = 2  # [ax, ay]
+elif dynamics == DynamicsModel.INFORMARL:
+    num_states = 4  # [x, y, vx, vy]
+    num_controls = 2  # [ax, ay]
 else:
     raise ValueError("Unsupported DynamicsModel selected.")
 
@@ -44,7 +48,7 @@ num_controls = num_controls
 
 
 n = 2                                      # Number of agents
-runtime = 22.0                             # Total runtime [s]
+runtime = 180.0                             # Total runtime [s]
 sim_ts = 0.2                                # Simulation Sampling time [s]
 MPC_Ts = 0.1                                   # MPC Sampling time [s]
 T_horizon = 6                              # Prediction horizon time steps

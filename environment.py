@@ -47,6 +47,8 @@ class Environment:
             return Environment.get_double_integrator_dynamics(x)
         elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
             return Environment.get_double_integrator_dynamics_macbf(x)
+        elif config.dynamics == DynamicsModel.INFORMARL:
+            return Environment.get_double_integrator_dynamics_informarl(x)
         else:
             raise ValueError("Unsupported DynamicsModel selected.")
 
@@ -114,6 +116,11 @@ class Environment:
         B[2, 0] = T_s           # Influence of ax on vx
         B[3, 1] = T_s           # Influence of ay on vy
         return A, B
+    
+    @staticmethod
+    def get_double_integrator_dynamics_informarl(x):
+        pass
+        
 
     """Configures the simulator."""
     def define_simulator(self):

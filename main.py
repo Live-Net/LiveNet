@@ -14,8 +14,9 @@ from data_logger import DataLogger, BlankLogger
 from environment import Environment
 from model_controller import ModelController
 from macbf_torch_controller import macbf_torch_controller
+from informarl_controller import informarl_controller
 
-from macbf_controller import macbf_controller
+# from macbf_controller import macbf_controller
 
 from blank_controller import BlankController
 from simulation import run_simulation
@@ -47,8 +48,12 @@ controllers = []
 # controllers.append(ModelController("weights/model2_l_saf_0_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy()))
 # controllers.append(ModelController("weights/model4_l_saf_0_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy()))
 # controllers.append(ModelController("weights/model_obs_l_f_0_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy()))
+
 # controllers.append(macbf_torch_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
-controllers.append(macbf_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
+
+controllers.append(informarl_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
+
+# controllers.append(macbf_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
 
 # Setup agent 1
 # controllers.append(MPC(agent_idx=1, goal=goals[1,:], static_obs=scenario.obstacles.copy(), delay_start=max(-config.agent_zero_offset, 0.0)))
@@ -63,7 +68,12 @@ controllers.append(macbf_controller("test", static_obs=scenario.obstacles.copy()
 # controllers.append(ModelController("weights/model_smg_obs_l_s_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy()))
 # controllers.append(ModelController("weights/model_base_w_lims_obs_l_s_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy())) # Star
 # controllers.append(MPC(agent_idx=1, goal=goals[1,:], static_obs=scenario.obstacles.copy()))
+
 # controllers.append(macbf_torch_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
+
+controllers.append(informarl_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
+
+
 
 
 # print("MONKEY BOX")
@@ -72,6 +82,6 @@ controllers.append(macbf_controller("test", static_obs=scenario.obstacles.copy()
 # print("")
 
 
-controllers.append(macbf_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
+# controllers.append(macbf_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
 
 run_simulation(scenario, env, controllers, logger, plotter)

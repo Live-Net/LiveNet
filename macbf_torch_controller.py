@@ -33,7 +33,7 @@ class macbf_torch_controller:
         self.initial_state = np.expand_dims(initial_state, axis=0)  # Shape: (1, 4)
         self.opp_state = np.expand_dims(opp_state, axis=0)  # Shape: (1, 4)
     
-    def make_step(self, initial_state):
+    def make_step(self, timestamp, initial_state):
         self.initial_state = np.expand_dims(initial_state, axis=0)  # Shape: (1, 4)
         with torch.no_grad():
             s_np = np.concatenate((self.initial_state, self.opp_state))
