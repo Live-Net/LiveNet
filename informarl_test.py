@@ -15,6 +15,7 @@ from InforMARL.onpolicy.algorithms.graph_MAPPOPolicy import GR_MAPPOPolicy as Po
 device = torch.device("cpu")
 
 
+
 def create_graph_inputs(agent_positions, obstacle_positions, goal_positions):
     n_rollout_threads = 1
     num_agents = agent_positions.shape[0]
@@ -22,10 +23,10 @@ def create_graph_inputs(agent_positions, obstacle_positions, goal_positions):
     num_goals = goal_positions.shape[0]
     total_nodes = num_agents + num_obstacles + num_goals  # Should equal 7
 
-    # 1. Create obs - agent observations
-    obs = np.zeros((n_rollout_threads * num_agents, 6))
+    # 1. Create obs - agent observations (unchanged)
+    obs = np.zeros((n_rollout_threads, num_agents, 6))
     for i in range(num_agents):
-        obs[i] = [
+        obs[0, i] = [
             agent_positions[i, 2],  # vx
             agent_positions[i, 3],  # vy
             agent_positions[i, 0],  # x
@@ -35,52 +36,49 @@ def create_graph_inputs(agent_positions, obstacle_positions, goal_positions):
         ]
 
     # 2. Create node_obs - features for all nodes
-    node_feature_dim = 7  # Number of features per node
-    node_obs = np.zeros((n_rollout_threads * num_agents, total_nodes, node_feature_dim))
+    node_obs = np.zeros((n_rollout_threads, num_agents, total_nodes, total_nodes))
 
     # Create a list of all node positions
     all_positions = np.vstack((agent_positions[:, :2], obstacle_positions, goal_positions))
 
-    # Fill node_obs with relative positions between agents and all nodes
-    for agent_idx in range(num_agents):
-        for i in range(total_nodes):
-            # Calculate relative position between agent and node i
-            rel_pos = all_positions[i] - agent_positions[agent_idx, :2]
-            dist = np.linalg.norm(rel_pos)
-            # Only connect nodes within max_edge_dist or self
-            if dist <= 1.0 or i == agent_idx:
-                # Store relative position features
-                node_obs[agent_idx, i, :] = [
-                    rel_pos[0],  # relative x
-                    rel_pos[1],  # relative y
-                    dist,        # distance
-                    i < num_agents,      # is_agent flag
-                    num_agents <= i < num_agents + num_obstacles,  # is_obstacle flag
-                    i >= num_agents + num_obstacles,  # is_goal flag
-                    1.0          # connection flag
-                ]
+    # Fill node_obs with relative positions between all nodes
+    for i in range(total_nodes):
+        for j in range(total_nodes):
+            if i != j:
+                # Calculate relative position between nodes i and j
+                rel_pos = all_positions[j] - all_positions[i]
+                dist = np.linalg.norm(rel_pos)
+
+                # Only connect nodes within max_edge_dist
+                if dist <= 1.0:  # from config max_edge_dist: 1
+                    # Store relative position features for both agents' perspectives
+                    # node_obs[0, :, i, j] = [
+                    #     rel_pos[0],  # relative x
+                    #     rel_pos[1],  # relative y
+                    #     dist,        # distance
+                    #     i < num_agents,      # is_agent flag
+                    #     num_agents <= i < num_agents + num_obstacles,  # is_obstacle flag
+                    #     i >= num_agents + num_obstacles,  # is_goal flag
+                    #     1.0          # connection flag
+                    # ]
+                    node_obs[0, :, i, j] = [dist, dist]
 
     # 3. Create adjacency matrix based on distances
-    adj = np.zeros((n_rollout_threads * num_agents, total_nodes, total_nodes))
-    for agent_idx in range(num_agents):
-        for i in range(total_nodes):
-            for j in range(total_nodes):
-                if i != j:
-                    dist = np.linalg.norm(all_positions[j] - all_positions[i])
-                    # Connect nodes within max_edge_dist
-                    if dist <= 1.0:
-                        adj[agent_idx, i, j] = 1
-                else:
-                    # Self-loop
-                    adj[agent_idx, i, j] = 1
+    adj = np.zeros((n_rollout_threads, num_agents, total_nodes, total_nodes))
+    for i in range(total_nodes):
+        for j in range(total_nodes):
+            if i != j:
+                dist = np.linalg.norm(all_positions[j] - all_positions[i])
+                # Connect nodes within max_edge_dist
+                if dist <= 1.0:
+                    adj[0, :, i, j] = 1
 
-    # 4. Create agent_ids
-    agent_id = np.zeros((n_rollout_threads * num_agents, 1))
+    # 4. Create agent_ids (unchanged)
+    agent_id = np.zeros((n_rollout_threads, num_agents, 1))
     for i in range(num_agents):
-        agent_id[i] = i
+        agent_id[0, i] = i
 
     return obs, agent_id, node_obs, adj
-
 
 
 # Example usage:
@@ -97,12 +95,6 @@ goal_positions = np.array([
     [0, 0],  # goal 1
     [1, 1]   # goal 2
 ])
-
-print("MONKEY MONKEY")
-print(agent_positions.shape)
-print(obstacle_positions.shape)
-print(goal_positions.shape)
-print("")
 
 obs, agent_id, node_obs, adj = create_graph_inputs(agent_positions, obstacle_positions, goal_positions)
 

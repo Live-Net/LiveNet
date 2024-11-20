@@ -24,6 +24,7 @@ ani_save_name = 'base_barriernet_model.mp4'
 # dynamics = DynamicsModel.SINGLE_INTEGRATOR
 # dynamics = DynamicsModel.DOUBLE_INTEGRATOR
 dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
+
 mpc_p0_faster = True
 agent_zero_offset = 0
 consider_intersects = True

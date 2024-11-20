@@ -172,6 +172,7 @@ class Environment:
             self.reset_state(initial_state)
             controller.reset_state(initial_state, opp_state)
             u1 = self.apply_control_lims(controller.make_step(sim_time, initial_state))
+            print(f"u1: {u1}")
             x1 = self.simulator.make_step(u1)
             new_states[agent_idx, :] = self.apply_state_lims(x1.ravel())
             outputted_controls[agent_idx, :] = u1.ravel()

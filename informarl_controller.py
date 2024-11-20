@@ -35,15 +35,9 @@ def create_graph_inputs(agent_positions, obstacle_positions, goal_positions):
 
     # 2. Create node_obs - features for all nodes
     node_obs = np.zeros((n_rollout_threads, num_agents, total_nodes, total_nodes))
-    
 
     # Create a list of all node positions
     all_positions = np.vstack((agent_positions[:, :2], obstacle_positions, goal_positions))
-
-
-    print(f"node_obs {node_obs.shape}")
-    print(f"all_positions {all_positions.shape}")
-    print(f"total_nodes {total_nodes}")
 
     # Fill node_obs with relative positions between all nodes
     for i in range(total_nodes):
@@ -56,15 +50,16 @@ def create_graph_inputs(agent_positions, obstacle_positions, goal_positions):
                 # Only connect nodes within max_edge_dist
                 if dist <= 1.0:  # from config max_edge_dist: 1
                     # Store relative position features for both agents' perspectives
-                    node_obs[0, :, i, j] = [
-                        rel_pos[0],  # relative x
-                        rel_pos[1],  # relative y
-                        dist,        # distance
-                        i < num_agents,      # is_agent flag
-                        num_agents <= i < num_agents + num_obstacles,  # is_obstacle flag
-                        i >= num_agents + num_obstacles,  # is_goal flag
-                        1.0          # connection flag
-                    ]
+                    # node_obs[0, :, i, j] = [
+                    #     rel_pos[0],  # relative x
+                    #     rel_pos[1],  # relative y
+                    #     dist,        # distance
+                    #     i < num_agents,      # is_agent flag
+                    #     num_agents <= i < num_agents + num_obstacles,  # is_obstacle flag
+                    #     i >= num_agents + num_obstacles,  # is_goal flag
+                    #     1.0          # connection flag
+                    # ]
+                    node_obs[0, :, i, j] = [dist, dist]
 
     # 3. Create adjacency matrix based on distances
     adj = np.zeros((n_rollout_threads, num_agents, total_nodes, total_nodes))
@@ -117,7 +112,6 @@ class informarl_controller:
 
         self.rnn_states = np.zeros(
             (
-                1,
                 2,
                 self.loaded_args.recurrent_N,
                 self.loaded_args.hidden_size,
@@ -174,13 +168,43 @@ class informarl_controller:
 
         obs, agent_id, node_obs, adj = create_graph_inputs(agent_positions, closest_obstacles, goal_positions)
 
-        print(f"obs {np.concatenate(obs).shape}")
-        print(f"node_obs {np.concatenate(node_obs).shape}")
-        print(f"adj {np.concatenate(adj).shape}")
-        print(f"agent_id {np.concatenate(agent_id).shape}")
-        print(f"rnn_states {self.rnn_states.shape}")
-        print(f"masks {self.masks.shape}")
+        # print(f"obs {np.concatenate(obs).shape}")
+        # print(f"node_obs {np.concatenate(node_obs).shape}")
+        # print(f"adj {np.concatenate(adj).shape}")
+        # print(f"agent_id {np.concatenate(agent_id).shape}")
+        # print(f"rnn_states {self.rnn_states.shape}")
+        # print(f"masks {self.masks.shape}")
 
+        action, self.rnn_states = self.policy.act(
+            np.concatenate(obs),
+            np.concatenate(node_obs),
+            np.concatenate(adj),
+            np.concatenate(agent_id),
+            self.rnn_states,
+            np.concatenate(self.masks),
+            deterministic=True,
+        )
+        
+        # actions: [None, ←, →, ↓, ↑, comm1, comm2]
+        
+        
 
-        exit(1)
+        res_action = np.array([0, 0])
+
+        cur_action = action[0, 0]
+        if cur_action == 0:
+            res_action = np.array([0, 0])
+        elif cur_action == 1:
+            res_action = np.array([-0.1, 0])
+        elif cur_action == 2:
+            res_action = np.array([0.1, 0])
+        elif cur_action == 3:
+            res_action = np.array([0, -0.1])
+        elif cur_action == 4:
+            res_action = np.array([0, 0.1])
+
+        print(res_action)
+        
+        return np.reshape(res_action, (2, 1))
+        
 
