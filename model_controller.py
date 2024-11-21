@@ -16,7 +16,7 @@ class ModelController:
             self.model = FCNet(self.model_definition).to(config.device)
         self.static_obs = static_obs
         print(self.model_definition.weights_path)
-        self.model.load_state_dict(torch.load(self.model_definition.weights_path))
+        self.model.load_state_dict(torch.load(self.model_definition.weights_path, map_location=torch.device('cpu')))
         self.model.eval()
 
     def initialize_controller(self, env):

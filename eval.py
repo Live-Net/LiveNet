@@ -38,7 +38,7 @@ if __name__ == "__main__":
     generator = DataGenerator(eval_data_paths, model_definition.x_is_d_goal)
 
     model = BarrierNet(model_definition, generator.get_obstacles(), generator.data_streams[0]["iterations"][0]["goals"][config.agents_to_train_on[0]]).to(config.device)
-    model.load_state_dict(torch.load(model_definition.weights_path))
+    model.load_state_dict(torch.load(model_definition.weights_path, map_location=torch.device('cpu')))
     model.eval()
 
     norm_inputs, input_mean, input_std = generator.get_inputs(agent_idx=config.agents_to_train_on, normalize=True)

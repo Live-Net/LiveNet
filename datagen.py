@@ -58,7 +58,7 @@ best_params = [
   (0.9, 0.3, 0.2, 1.1, False, 15.0), # 13
 ]
 
-folder_to_save_to = 'doorway_scenario_suite/'
+folder_to_save_to = 'intersection_scenario_suite/'
 
 # scenario_configs = scenario_configs[:1]
 # best_params = best_params[:1]
@@ -66,12 +66,12 @@ folder_to_save_to = 'doorway_scenario_suite/'
 offset = [0]
 zero_faster = [True, False]
 for scenario_config, mpc_params in zip(scenario_configs, best_params):
-    config.opp_gamma = mpc_params[0]
-    config.obs_gamma = mpc_params[1]
-    config.liveliness_gamma = mpc_params[2]
-    config.liveness_threshold = mpc_params[3]
-    config.mpc_use_opp_cbf = mpc_params[4]
-    config.runtime = mpc_params[5]
+    # config.opp_gamma = mpc_params[0]
+    # config.obs_gamma = mpc_params[1]
+    # config.liveliness_gamma = mpc_params[2]
+    # config.liveness_threshold = mpc_params[3]
+    # config.mpc_use_opp_cbf = mpc_params[4]
+    # config.runtime = mpc_params[5]
     for z in zero_faster:
         for o in offset:
             print(f"Running scenario {scenario_config} with z {z} and o {o}")
@@ -86,11 +86,13 @@ for scenario_config, mpc_params in zip(scenario_configs, best_params):
             log_filename = f's_{scenario_config[0]}_{scenario_config[1]}_{scenario_config[2]}_{scenario_config[3]}_l_{0 if z else 1}_faster_off{o}.json'
             logger = DataLogger(os.path.join(folder_to_save_to, log_filename))
 
-            scenario = DoorwayScenario(initial_x=scenario_config[0], initial_y=scenario_config[1], goal_x=scenario_config[2], goal_y=scenario_config[3])
+            # scenario = DoorwayScenario(initial_x=scenario_config[0], initial_y=scenario_config[1], goal_x=scenario_config[2], goal_y=scenario_config[3])
+            scenario = IntersectionScenario()
+
 
             # Matplotlib plotting handler
-            # plotter = Plotter()
-            plotter = None
+            plotter = Plotter()
+            # plotter = None
 
             # Add all initial and goal positions of the agents here (Format: [x, y, theta])
             goals = scenario.goals.copy()

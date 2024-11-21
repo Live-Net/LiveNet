@@ -110,6 +110,7 @@ train_data_paths = [
 #                     'doorway_scenario_suite/s_-0.5_0.5_2.0_0.15_l_0_faster_off0.json', 'doorway_scenario_suite/s_-0.5_0.4_2.0_0.15_l_0_faster_off0.json', 'doorway_scenario_suite/s_-0.5_0.3_2.0_0.15_l_0_faster_off0.json', ]
 
 train_data_paths = ['doorway_scenario_suite/']
+train_data_paths = ['intersection_scenario_suite/']
 
 # train_data_paths = []
 # for filename in os.listdir('doorway_scenario_suite'):
@@ -122,11 +123,11 @@ agents_to_train_on = [1]
 
 # CBF Filters
 add_control_limits = False
-add_liveness_filter = True
+add_liveness_filter = False
 
 # Changing the inputs / outputs
 x_is_d_goal = True
-add_liveness_as_input = True
+add_liveness_as_input = False
 n_opponents = 12
 separate_penalty_for_opp = False # SHOULDNT NEED THIS HOPEFULLY
 fixed_liveness_input = True
@@ -134,7 +135,8 @@ fixed_liveness_input = True
 train_batch_size = 32
 # train_batch_size = 1
 use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
+# device = torch.device("cuda" if use_cuda else "cpu")
+device = torch.device("mps")
 learning_rate = 1e-3
 epochs = 30
 nHidden1 = 256

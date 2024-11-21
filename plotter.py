@@ -45,6 +45,63 @@ class Plotter:
             plt.waitforbuttonpress()
 
 
+    # # Add this to your update method
+    # def update(self, frame):
+    #     self.ax.clear()
+
+    #     frame *= config.plot_rate
+
+    #     plot_x_bounds = max(self.scenario.plot_bounds[:, 0]) - min(self.scenario.plot_bounds[:, 0])
+    #     plot_y_bounds = max(self.scenario.plot_bounds[:, 1]) - min(self.scenario.plot_bounds[:, 1])
+    #     ratio = plot_x_bounds / plot_y_bounds
+    #     height = 5
+    #     width = int(round(ratio * height))
+    #     self.fig.set_figwidth(width)
+    #     self.fig.set_figheight(height)
+
+    #     # Redraw static elements
+    #     self.scenario.plot(self.ax)
+
+    #     # Reset plot limits and other properties as needed
+    #     self.ax.set_xlim(min(self.scenario.plot_bounds[:, 0]), max(self.scenario.plot_bounds[:, 0]))
+    #     self.ax.set_ylim(min(self.scenario.plot_bounds[:, 1]), max(self.scenario.plot_bounds[:, 1]))
+
+    #     # Determine the start index for the fading effect
+    #     trail_length = 100
+    #     start_index = max(0, frame - trail_length)  # Adjust 'trail_length' to control trail size
+    #     if start_index == 0:
+    #         trail_length = frame
+
+    #     # Create a color map for the fading trails
+    #     cmap = cm.get_cmap('cool')  # You can use other colormaps like 'plasma', 'cool', etc.
+    #     norm = mcolors.Normalize(vmin=start_index, vmax=frame)
+
+    #     # Draw the fading trails for agents 1 and 2
+    #     for i in range(start_index, frame - 1, config.plot_rate):
+    #         alpha = 1 - ((frame - 1 - i) / trail_length) ** 2
+    #         color = cmap(norm(i))
+
+    #         # Draw fading trails with dynamic colors
+    #         self.ax.plot(self.x_cum[0][i:i + 2, 0], self.x_cum[0][i:i + 2, 1], color=color, alpha=alpha, linewidth=5)
+    #         self.ax.plot(self.x_cum[1][i:i + 2, 0], self.x_cum[1][i:i + 2, 1], color=color, alpha=alpha, linewidth=5)
+
+    #         # Plot real-sized objects with fading colors
+    #         circle = patches.Circle(self.x_cum[0][i, :2], config.agent_radius, linewidth=1, edgecolor=color, 
+    #                                 facecolor=color, fill=True, alpha=alpha)
+    #         self.ax.add_patch(circle)
+    #         circle = patches.Circle(self.x_cum[1][i, :2], config.agent_radius, linewidth=1, edgecolor=color, 
+    #                                 facecolor=color, fill=True, alpha=alpha)
+    #         self.ax.add_patch(circle)
+
+
+    #     if config.plot_arrows:
+    #         pos_diff, vel_diff = self.metrics[frame][2], self.metrics[frame][3] * -3.0
+    #         print(pos_diff, vel_diff)
+    #         self.ax.arrow(0, 0, pos_diff[0], pos_diff[1], head_width=0.05, head_length=0.1, fc='green', ec='green', label='Position difference')
+    #         self.ax.arrow(0, 0, vel_diff[0], vel_diff[1], head_width=0.05, head_length=0.1, fc='orange', ec='orange', label='Velocity difference')
+        
+    #     return []
+
     # Function to update the plots
     def update(self, frame):
         self.ax.clear()
@@ -54,7 +111,7 @@ class Plotter:
         plot_x_bounds = max(self.scenario.plot_bounds[:, 0]) - min(self.scenario.plot_bounds[:, 0])
         plot_y_bounds = max(self.scenario.plot_bounds[:, 1]) - min(self.scenario.plot_bounds[:, 1])
         ratio = plot_x_bounds / plot_y_bounds
-        height = 12
+        height = 8
         width = int(round(ratio * height))
         self.fig.set_figwidth(width)
         self.fig.set_figheight(height)
@@ -109,11 +166,11 @@ class Plotter:
 
         # Determine the start index for the fading effect
         # trail_length = 20 * config.plot_rate
-        trail_length = 20
+        trail_length = 40
         start_index = max(0, frame - trail_length)  # Adjust '10' to control the length of the fading trail
 
         # Draw the fading trails for agents 1 and 2
-        for i in range(start_index, frame - 1, config.plot_rate):
+        for i in range(start_index, frame - 1, 3):
         # if True:
         #     trail_length = 1
         #     i = start_index
