@@ -6,20 +6,30 @@
 # N is number of iterations for one time horizon
 # mpc_cbf.py containst eh code for the Game thereotic MPC controllers for agent 1 and 2 respectively
 
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+pic_dir = os.path.join(current_dir, 'PIC')
+sys.path.insert(0, pic_dir)
+sys.path.insert(0, os.path.join(pic_dir, 'maddpg'))
+sys.path.insert(0, os.path.join(pic_dir, 'models'))
+
 import config
 import numpy as np
 from metrics import gather_all_metric_data
 from mpc_cbf import MPC
 from scenarios import DoorwayScenario, IntersectionScenario
-from data_logger import BlankLogger
+# from data_logger import BlankLogger
 from environment import Environment
-from model_controller import ModelController
+# from model_controller import ModelController
+from PIC_controller import pic_controller
 from simulation import run_simulation
 from macbf_torch_controller import macbf_torch_controller
 from tqdm import tqdm
 
 SCENARIO = 'Intersection'
-RUN_AGENT = 'MPC'
+RUN_AGENT = 'PIC'
 
 def get_mpc_controllers(scenario, zero_goes_faster):
     config.mpc_p0_faster = zero_goes_faster
@@ -43,6 +53,14 @@ def get_macbf_controllers(scenario):
     return controllers
 
 
+def get_pic_controllers(scenario):
+    controllers = [
+        pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
+        pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:])
+    ]
+    return controllers
+
+
 # Scenarios: "doorway" or "intersection"
 if SCENARIO == 'Doorway':
     scenario_params = (-1.0, 0.5, 2.0, 0.15)
@@ -57,16 +75,22 @@ all_metric_data = []
 for sim in tqdm(range(NUM_SIMS)):
     # print("Running sim:", sim)
     plotter = None
-    logger = BlankLogger()
+    # logger = BlankLogger()
+    logger = None
 
     # Add all initial and goal positions of the agents here (Format: [x, y, theta])
     goals = scenario.goals.copy()
-    logger.set_obstacles(scenario.obstacles.copy())
+
+    if logger:
+        logger.set_obstacles(scenario.obstacles.copy())
+
     env = Environment(scenario.initial.copy(), scenario.goals.copy())
     if RUN_AGENT == 'MPC':
         controllers = get_mpc_controllers(scenario, True)
-    if RUN_AGENT == 'MACBF':
+    elif RUN_AGENT == 'MACBF':
         controllers = get_macbf_controllers(scenario)
+    elif RUN_AGENT == "PIC":
+        controllers = get_pic_controllers(scenario)
 
     x_cum, u_cum = run_simulation(scenario, env, controllers, logger, plotter)
 

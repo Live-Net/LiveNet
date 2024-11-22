@@ -9,6 +9,7 @@ class DynamicsModel(Enum):
     SINGLE_INTEGRATOR = auto()
     DOUBLE_INTEGRATOR = auto()
     DOUBLE_INTEGRATOR_MACBF = auto()
+    DOUBLE_INTEGRATOR_PIC = auto()
 
 # Liveness parameters.
 liveliness = True
@@ -24,8 +25,9 @@ plot_end_ani_only = False
 ani_save_name = 'base_barriernet_model.mp4'
 
 # dynamics = DynamicsModel.SINGLE_INTEGRATOR
-dynamics = DynamicsModel.DOUBLE_INTEGRATOR
+# dynamics = DynamicsModel.DOUBLE_INTEGRATOR
 # dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
+dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
 
 mpc_p0_faster = True
 agent_zero_offset = 0
@@ -40,17 +42,23 @@ elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
 elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
     num_states = 4  # [x, y, vx, vy]
     num_controls = 2  # [ax, ay]
+elif dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+    num_states = 4  # [x, y, vx, vy]
+    num_controls = 2  # [ax, ay]
+
 else:
     raise ValueError("Unsupported DynamicsModel selected.")
 
 num_states = num_states
 num_controls = num_controls
 
+plot_text_on = True
+
 
 n = 2                                      # Number of agents
 runtime = 20.0                             # Total runtime [s]
 
-if dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+if dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
     sim_ts = 0.1
 else:
     sim_ts = 0.2                                # Simulation Sampling time [s]

@@ -48,6 +48,8 @@ class Environment:
             return Environment.get_double_integrator_dynamics(x)
         elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
             return Environment.get_double_integrator_dynamics_macbf(x)
+        elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+            return Environment.get_double_integrator_dynamics_pic(x)
         else:
             raise ValueError("Unsupported DynamicsModel selected.")
 
@@ -98,7 +100,6 @@ class Environment:
             vx_{k+1} = vx_k + ax_k * T_s
             vy_{k+1} = vy_k + ay_k * T_s
         """
-
         A = SX.zeros(config.num_states, 1)
         A[0] = x[2]
         A[1] = x[3]
@@ -107,13 +108,23 @@ class Environment:
         # Define B matrix (control influence)
         B = SX.zeros(config.num_states, config.num_controls)
 
-        # Should be included but dynamics were not part of macbf training. 
-        # B[0, 0] = 0.5 * T_s**2  # Influence of ax on x 
-        # B[1, 1] = 0.5 * T_s**2  # Influence of ay on y
-
         B[2, 0] = 1           # Influence of ax on vx
         B[3, 1] = 1           # Influence of ay on vy
         return A, B
+    
+
+    @staticmethod
+    def get_double_integrator_dynamics_pic(x):
+        A = SX.zeros(config.num_states, 1)
+        A[0] = x[2]
+        A[1] = x[3]
+        A[2] = -0.25*x[2]
+        A[3] = -0.25*x[3]
+        B = SX.zeros(config.num_states, config.num_controls)
+        B[2, 0] = 1
+        B[3, 1] = 1
+        return A, B
+
 
     """Configures the simulator."""
     def define_simulator(self):
@@ -200,7 +211,8 @@ class Environment:
             use_for_training.append(controller.use_for_training)
 
         # if sim_time >= abs(config.agent_zero_offset):
-        logger.log_iteration(self.initial_states, self.goals, outputted_controls, use_for_training)
+        if logger:
+            logger.log_iteration(self.initial_states, self.goals, outputted_controls, use_for_training)
         self.initial_states = new_states.copy()
         self.history.append(new_states.copy())
         return new_states, outputted_controls

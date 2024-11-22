@@ -1,10 +1,10 @@
 import config
 import numpy as np
 
-AGENT = 'MPC'
 SCENARIO = 'Intersection'
+RUN_AGENT = 'PIC'
 
-metrics = np.loadtxt(f'experiment_results/{AGENT}_{SCENARIO}.csv', delimiter=',')
+metrics = np.loadtxt(f'experiment_results/{RUN_AGENT}_{SCENARIO}.csv', delimiter=',')
 
 IDXS = {
     'goal_reach_idx0': 0,
@@ -49,7 +49,7 @@ deltaPaths = metrics[:, [IDXS['path_dev_0'], IDXS['path_dev_1']]].flatten()
 avg_delta_path = np.average(deltaPaths)
 err_delta_path = np.std(deltaPaths) / np.sqrt(deltaPaths.size)
 
-print(f"Accumulated metrics for {AGENT} agents in {SCENARIO} scenario")
+print(f"Accumulated metrics for {RUN_AGENT} agents in {SCENARIO} scenario")
 print("Num simulations run:", num_sims)
 print("Number of collisions:", collisions)
 print("Number of deadlocks:", deadlocks)

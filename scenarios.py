@@ -31,7 +31,7 @@ class DoorwayScenario:
                     [self.initial_x, -self.initial_y, 0]])
         self.goals = np.array([[self.goal_x, -self.goal_y, 0.0],
                     [self.goal_x, self.goal_y, 0.0]])
-        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or DynamicsModel.DOUBLE_INTEGRATOR_PIC:
             # Set initial state to 0 velocity and goal to 0 velocity.
             zeros = np.zeros((self.num_agents, 1))
             self.initial = np.hstack((self.initial, zeros))
@@ -88,7 +88,7 @@ class NoObstacleDoorwayScenario:
 
 class IntersectionScenario:
     def __init__(self):
-        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF:
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
             self.initial = np.array([[0.0, -1.0, 0.0, 0.0],
                         [-1.0, 0.0, 0.0, 0.0]])
         else:
