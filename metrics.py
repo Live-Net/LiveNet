@@ -37,11 +37,14 @@ def calculate_path_deviation(traj, desired_path):
 
 
 def check_when_reached_goal(traj, goal):
+    min_dist = float("inf")
     for iteration, state in enumerate(traj):
         # If we've reached the goal and come to a stop, stop counting.
-        if np.linalg.norm(state[:2] - goal) < 0.05 and np.abs(state[3]) < 0.05:
+        min_dist = min(min_dist, np.linalg.norm(state[:2] - goal))
+        if np.linalg.norm(state[:2] - goal) < 0.3:
             return iteration
 
+    print("Min dist", min_dist)
     return None
 
 

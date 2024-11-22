@@ -16,7 +16,7 @@ from environment import Environment
 from model_controller import ModelController
 from simulation import run_simulation
 
-SCENARIO = 'Doorway'
+SCENARIO = 'Intersection'
 
 # RUN_AGENT = 'MPC'
 RUN_AGENT = 'MPC_BARE'
@@ -42,6 +42,9 @@ def get_barriernet_controllers(scenario):
     if SCENARIO == 'Doorway':
         model_0_def = "weights/model_base_single_input_obs_wc_nolim_saf_suite_0_bn_definition.json"
         model_1_def = "weights/model_base_single_input_obs_wc_nolim_saf_suite_1_bn_definition.json"
+    else:
+        model_0_def = "weights/model_base_single_input_obs_wc_nolim_linp_f_fullsuite_live_0_bn_definition.json"
+        model_1_def = "weights/model_base_single_input_obs_wc_nolim_linp_f_fullsuite_live_1_bn_definition.json"
 
     controllers = [
         ModelController(model_0_def, scenario.goals[0], scenario.obstacles.copy()),
@@ -54,6 +57,10 @@ def get_barriernet_controllers(scenario):
 if SCENARIO == 'Doorway':
     scenario_params = (-1.0, 0.5, 2.0, 0.15)
     scenario = DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3])
+else:
+    scenario = IntersectionScenario()
+
+
 
 NUM_SIMS = 50
 
@@ -79,3 +86,10 @@ for sim in range(NUM_SIMS):
 
 all_metric_data = np.array(all_metric_data)
 np.savetxt(f'experiment_results/{RUN_AGENT}_{SCENARIO}.csv', all_metric_data, fmt='%0.4f', delimiter=', ', header='goal_reach_idx0, goal_reach_idx1, min_agent_dist, traj_collision, obs_min_dist_0, obs_collision_0, obs_min_dist_1, obs_collision_1, delta_vel_0, delta_vel_1, path_dev_0, path_dev_1')
+
+# Num simulations run: 50
+# Number of collisions: 0
+# Number of deadlocks: 50
+# Slower TTG: -0.19999999999999996 +/- 7.850462293418875e-18
+# Delta Velocity: 0.004850000000000001 +/- 9.499999999999998e-05
+# Path Deviation: 0.0008000000000000001 +/- 2.0000000000000005e-05

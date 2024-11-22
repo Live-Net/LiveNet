@@ -35,7 +35,7 @@ else:
     num_controls = 2 # (a, omega)
 
 n = 2                                      # Number of agents
-runtime = 20.0                             # Total runtime [s]
+runtime = 30.0                             # Total runtime [s]
 sim_ts = 0.2                                # Simulation Sampling time [s]
 MPC_Ts = 0.1                                   # MPC Sampling time [s]
 T_horizon = 6                              # Prediction horizon time steps
@@ -118,7 +118,7 @@ train_data_paths = ['intersection_scenario_suite/']
 #     # if '1_faster' in filename:
 #         train_data_paths.append(os.path.join('doorway_scenario_suite', filename))
 
-agents_to_train_on = [1]
+agents_to_train_on = [0]
 # agents_to_train_on = [0, 1]
 
 # CBF Filters
@@ -135,8 +135,8 @@ fixed_liveness_input = True
 train_batch_size = 32
 # train_batch_size = 1
 use_cuda = torch.cuda.is_available()
-# device = torch.device("cuda" if use_cuda else "cpu")
-device = torch.device("mps")
+device = torch.device("cuda" if use_cuda else "cpu")
+# device = torch.device("mps")
 learning_rate = 1e-3
 epochs = 30
 nHidden1 = 256
