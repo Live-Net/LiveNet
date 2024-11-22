@@ -6,6 +6,15 @@
 # N is number of iterations for one time horizon
 # mpc_cbf.py containst eh code for the Game thereotic MPC controllers for agent 1 and 2 respectively
 
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+pic_dir = os.path.join(current_dir, 'PIC')
+sys.path.insert(0, pic_dir)
+sys.path.insert(0, os.path.join(pic_dir, 'maddpg'))
+sys.path.insert(0, os.path.join(pic_dir, 'models'))
+
 import config
 import numpy as np
 from metrics import gather_all_metric_data, load_desired_path
@@ -13,7 +22,8 @@ from mpc_cbf import MPC
 from scenarios import DoorwayScenario, IntersectionScenario
 from data_logger import BlankLogger, DataLogger
 from environment import Environment
-from model_controller import ModelController
+# from model_controller import ModelController
+from PIC_controller import pic_controller
 from simulation import run_simulation
 from plotter import Plotter
 
@@ -21,7 +31,7 @@ from plotter import Plotter
 SCENARIO = 'Intersection'
 
 SCENARIO = 'Intersection'
-RUN_AGENT = 'MPC'
+RUN_AGENT = 'PIC'
 # RUN_AGENT = 'MPC_UNLIVE'
 # RUN_AGENT = 'BarrierNet'
 # RUN_AGENT = 'LiveNet'
@@ -76,6 +86,22 @@ def get_macbf_controllers(scenario):
     return controllers
 
 
+def get_pic_controllers(scenario):
+    controllers = [
+        pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
+        pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:])
+    ]
+    return controllers
+
+
+def get_pic_controllers(scenario):
+    controllers = [
+        pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
+        pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:])
+    ]
+    return controllers
+
+
 def get_barriernet_controllers(scenario):
     if SCENARIO == 'Doorway':
         model_0_def = "weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1_bn_definition.json"
@@ -123,15 +149,19 @@ if __name__ == '__main__':
     all_metric_data = []
     for sim in range(NUM_SIMS if SIM_RESULTS_MODE else 1):
         plotter = None
-        logger = BlankLogger() if SIM_RESULTS_MODE else DataLogger(f"experiment_results/histories/{RUN_AGENT}_{SCENARIO}.json")
+        # logger = BlankLogger() if SIM_RESULTS_MODE else DataLogger(f"experiment_results/histories/{RUN_AGENT}_{SCENARIO}.json")
+    logger = None
 
         # Add all initial and goal positions of the agents here (Format: [x, y, theta])
         goals = scenario.goals.copy()
+    
+    if logger:
         logger.set_obstacles(scenario.obstacles.copy())
-        env = Environment(scenario.initial.copy(), scenario.goals.copy())
+    
+    env = Environment(scenario.initial.copy(), scenario.goals.copy())
         if RUN_AGENT == 'MPC':
             controllers = get_mpc_live_controllers(scenario, True)
-        elif RUN_AGENT == 'MACBF':
+        elelif RUN_AGENT == 'MACBF':
             controllers = get_macbf_controllers(scenario)
         elif RUN_AGENT == 'MPC_UNLIVE':
             controllers = get_mpc_unlive_controllers(scenario)
@@ -140,13 +170,15 @@ if __name__ == '__main__':
         elif RUN_AGENT == 'LiveNet':
             controllers = get_livenet_controllers(scenario)
 
-        env.compute_history = []
+        env.compute_history = []    elif RUN_AGENT == "PIC":
+        controllers = get_pic_controllers(scenario)
+
         x_cum, u_cum = run_simulation(scenario, env, controllers, logger, plotter)
 
-        desired_path_0 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{RUN_AGENT}_0.json", 0)
-        desired_path_1 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{RUN_AGENT}_1.json", 1)
-        metric_data = gather_all_metric_data(scenario, x_cum[0], x_cum[1], scenario.goals, env.compute_history, desired_path_0=desired_path_0, desired_path_1=desired_path_1)
-        all_metric_data.append(metric_data)
+    desired_path_0 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{RUN_AGENT}_0.json", 0)
+    desired_path_1 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{RUN_AGENT}_1.json", 1)
+    metric_data = gather_all_metric_data(scenario, x_cum[0], x_cum[1], scenario.goals, env.compute_history, desired_path_0=desired_path_0, desired_path_1=desired_path_1)
+    all_metric_data.append(metric_data)
 
     if SIM_RESULTS_MODE:
         all_metric_data = np.array(all_metric_data)

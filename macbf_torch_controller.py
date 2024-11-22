@@ -25,7 +25,7 @@ class macbf_torch_controller:
         self.goal = torch.tensor(goal_np, dtype=torch.float32, device=device)
         self.goal = self.goal.unsqueeze(0)
         
-        
+
 
     def initialize_controller(self, env):
         pass

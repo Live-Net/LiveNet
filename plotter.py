@@ -47,7 +47,6 @@ class Plotter:
             plt.waitforbuttonpress()
 
 
-
     # # Add this to your update method
     # def update(self, frame):
     #     self.ax.clear()
@@ -106,6 +105,8 @@ class Plotter:
     #     return []
 
     # Function to update the plots
+    # Function to update the plots
+
     def update(self, frame):
         self.ax.clear()
 
@@ -127,22 +128,20 @@ class Plotter:
         self.ax.set_xlim(min(self.scenario.plot_bounds[:, 0]), max(self.scenario.plot_bounds[:, 0]))
         self.ax.set_ylim(min(self.scenario.plot_bounds[:, 1]), max(self.scenario.plot_bounds[:, 1]))
 
-        u0, u1 = np.round(self.u_cum[0][frame], 2), np.round(self.u_cum[1][frame], 2)
+        # Extract metrics for liveliness text
         try:
             L = np.round(self.metrics[frame][0], 2)
-            ttc= np.round(self.metrics[frame][1], 2)
+            ttc = np.round(self.metrics[frame][1], 2)
             intersects = self.metrics[frame][4]
             is_live = self.metrics[frame][5]
         except Exception as e:
             print(e)
-            L = 0
-            ttc = 0
-            intersects = False
-            is_live = False
+            L, ttc, intersects, is_live = 0, 0, False, False
+
         x0_state, x1_state = self.x_cum[0][frame].T.copy(), self.x_cum[1][frame].T.copy()
         x0_state[2] = np.rad2deg(x0_state[2])
-        x1_state = self.x_cum[1][frame].T.copy()
         x1_state[2] = np.rad2deg(x1_state[2])
+
         agent_dist = np.linalg.norm(x0_state[:2] - x1_state[:2])
         opp_collides = agent_dist < config.agent_radius * 2 + config.safety_dist
         closest_obs_dists = []
@@ -188,18 +187,22 @@ class Plotter:
             # Plot real-sized objects.
             circle = patches.Circle(self.x_cum[0][i, :2], config.agent_radius, linewidth=1, edgecolor='r', facecolor='r', fill=True, alpha=alpha)
             self.ax.add_patch(circle)
-            circle = patches.Circle(self.x_cum[1][i, :2], config.agent_radius, linewidth=1, edgecolor='b', facecolor='b', fill=True, alpha=alpha)
-            self.ax.add_patch(circle)
-            # self.ax.arrow(x0_state[0], x0_state[1], math.cos(np.deg2rad(x0_state[2])) * x0_state[3] * 10.0, math.sin(np.deg2rad(x0_state[2])) * x0_state[3] * 10.0, head_width=0.05, head_length=0.1, fc='red', ec='red')
-            # self.ax.arrow(x1_state[0], x1_state[1], math.cos(np.deg2rad(x1_state[2])) * x1_state[3] * 10.0, math.sin(np.deg2rad(x1_state[2])) * x1_state[3] * 10.0, head_width=0.05, head_length=0.1, fc='blue', ec='blue')
 
-        if config.plot_arrows:
-            pos_diff, vel_diff = self.metrics[frame][2], self.metrics[frame][3] * -3.0
-            print(pos_diff, vel_diff)
-            self.ax.arrow(0, 0, pos_diff[0], pos_diff[1], head_width=0.05, head_length=0.1, fc='green', ec='green', label='Position difference')
-            self.ax.arrow(0, 0, vel_diff[0], vel_diff[1], head_width=0.05, head_length=0.1, fc='orange', ec='orange', label='Velocity difference')
-        
+            circle = patches.Circle(self.x_cum[1][i, :2], config.agent_radius, linewidth=0.5,
+                                    edgecolor='b', facecolor='b', alpha=alpha)
+            self.ax.add_patch(circle)
+
+        # Plot current agent positions
+        circle = patches.Circle(self.x_cum[0][frame, :2], config.agent_radius, linewidth=1,
+                                edgecolor='r', facecolor='r', alpha=1.0)
+        self.ax.add_patch(circle)
+
+        circle = patches.Circle(self.x_cum[1][frame, :2], config.agent_radius, linewidth=1,
+                                edgecolor='b', facecolor='b', alpha=1.0)
+        self.ax.add_patch(circle)
+
         return []
+
 
 
     def plot(self, scenario, x_cum, u_cum, metrics):

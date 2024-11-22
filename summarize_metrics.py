@@ -8,8 +8,9 @@ AGENT = 'LiveNet'
 
 # SCENARIO = 'Doorway'
 SCENARIO = 'Intersection'
+RUN_AGENT = 'PIC'
 
-metrics = np.loadtxt(f'experiment_results/{AGENT}_{SCENARIO}.csv', delimiter=',')
+metrics = np.loadtxt(f'experiment_results/{RUN_AGENT}_{SCENARIO}.csv', delimiter=',')
 
 IDXS = {
     'goal_reach_idx0': 0,
@@ -61,7 +62,7 @@ compute_times = metrics[:, [IDXS['avg_compute_0'], IDXS['avg_compute_1']]].flatt
 avg_compute_time = np.average(compute_times)
 err_compute_time = np.std(compute_times) / np.sqrt(compute_times.size)
 
-print(f"Accumulated metrics for {AGENT} agents in {SCENARIO} scenario")
+print(f"Accumulated metrics for {RUN_AGENT} agents in {SCENARIO} scenario")
 print("Num simulations run:", num_sims)
 print("Number of collisions:", collisions)
 print("Number of deadlocks:", deadlocks)
