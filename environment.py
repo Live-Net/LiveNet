@@ -4,6 +4,7 @@ import config
 from config import DynamicsModel
 import numpy as np
 from memory_profiler import profile
+from util import axay_to_aw_control_xyvxvy, aw_to_axay_control_xyvxvy
 
 class Environment:
     def __init__(self, initial_states, goals):
@@ -140,41 +141,45 @@ class Environment:
         self.simulator.x0 = x0
     
     def apply_state_lims(self, state):
+
+        if not config.apply_state_limit:
+            return state
+
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+            speed = np.linalg.norm(state[2:])
+            if speed > config.v_limit and speed > 1e-8:
+                scale = config.v_limit / speed
+                state[2] = state[2] * scale 
+                state[3] = state[3] * scale
+            return state
+
         if state[3] > config.v_limit:
             state[3] = config.v_limit
         if state[3] < -config.v_limit:
             state[3] = -config.v_limit
         return state
 
-    def apply_control_lims(self, control):
-        if control[0] > config.omega_limit:
-            control[0] = config.omega_limit
-        if control[0] < -config.omega_limit:
-            control[0] = -config.omega_limit
-        if control[1] > config.accel_limit:
-            control[1] = config.accel_limit
-        if control[1] < -config.accel_limit:
-            control[1] = -config.accel_limit
+
+    def apply_control_lims(self, control, state):
+
+        if not config.apply_control_limit:
+            return control
+
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+            control = axay_to_aw_control_xyvxvy(control, state)
+        if control[0][0] > config.omega_limit:
+            control[0][0] = config.omega_limit
+        if control[0][0] < -config.omega_limit:
+            control[0][0] = -config.omega_limit
+        if control[1][0] > config.accel_limit:
+            control[1][0] = config.accel_limit
+        if control[1][0] < -config.accel_limit:
+            control[1][0] = -config.accel_limit
+        
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+            control = aw_to_axay_control_xyvxvy(control, state)
         return control
 
-    def apply_state_lims_macbf(self, state):
-        # v = np.lianlg.norm(state[2:4])
-        # if v > config.v_limit:
-        #     division = v / config.v_limit
-        #     state[2] /= division
-        #     state[3] /= division
-        return state
-
-    def apply_control_lims_macbf(self, control):
-        # if control[0] > config.omega_limit:
-        #     control[0] = config.omega_limit
-        # if control[0] < -config.omega_limit:
-        #     control[0] = -config.omega_limit
-        # if control[1] > config.accel_limit:
-        #     control[1] = config.accel_limit
-        # if control[1] < -config.accel_limit:
-        #     control[1] = -config.accel_limit
-        return control
 
     # @profile
     def run_simulation(self, sim_iteration, controllers, logger):
@@ -196,18 +201,11 @@ class Environment:
                 opp_state = np.append(opp_state, [opp_vel])
             self.reset_state(initial_state)
             controller.reset_state(initial_state, opp_state)
-            
-
-            u1 = controller.make_step(sim_time, initial_state)
-            # u1 = self.apply_control_lims(controller.make_step(sim_time, initial_state))
-
-
+            u1 = self.apply_control_lims(controller.make_step(sim_time, initial_state), initial_state)
             x1 = self.simulator.make_step(u1)
-            print(initial_state, u1.ravel(), x1.ravel())
-            # new_states[agent_idx, :] = self.apply_state_lims(x1.ravel())
-            new_states[agent_idx, :] = x1.ravel()
+            new_states[agent_idx, :] = self.apply_state_lims(x1.ravel())
             outputted_controls[agent_idx, :] = u1.ravel()
-            # print(f"Initial state: {initial_state}, Output control: {outputted_controls[agent_idx, :]}, New state: {new_states[agent_idx, :]}")
+            print(f"Initial state: {initial_state}, Output control: {outputted_controls[agent_idx, :]}, New state: {new_states[agent_idx, :]}")
             use_for_training.append(controller.use_for_training)
 
         # if sim_time >= abs(config.agent_zero_offset):
