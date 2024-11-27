@@ -84,6 +84,8 @@ agent_radius = 0.1                         # Robot radius (for obstacle avoidanc
 zeta = 3.0
 
 # Actuator limits
+apply_control_limit = False
+apply_state_limit = False
 v_limit = 0.30                             # Linear velocity limit
 omega_limit = 0.5                          # Angular velocity limit
 accel_limit = 0.1

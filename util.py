@@ -226,3 +226,60 @@ def axay_to_aw_control(state, control):
     a, w = dv, dtheta
     return np.array([a, w])
 
+
+def axay_to_aw_control_xyvxvy(control, state):    
+    vx = state[2]
+    vy = state[3]
+    ax = control[0][0]
+    ay = control[1][0]
+
+    delta_vx = ax * config.sim_ts
+    delta_vy = ay * config.sim_ts
+    
+    new_vx = vx + delta_vx
+    new_vy = vy + delta_vy
+    
+    dv = np.sqrt(delta_vx**2 + delta_vy**2)
+    
+    theta_current = np.arctan2(vy, vx)
+    theta_new = np.arctan2(new_vy, new_vx)
+    
+    dtheta = theta_new - theta_current
+    dtheta = (dtheta + np.pi) % (2 * np.pi) - np.pi
+    
+    # Handle the case where velocity is zero to avoid undefined direction
+    if np.hypot(vx, vy) < 1e-8:
+        theta_current = 0.0     # Default direction -> Along x-axis
+        theta_new = np.arctan2(new_vy, new_vx)
+        dtheta = theta_new - theta_current
+        dtheta = (dtheta + np.pi) % (2 * np.pi) - np.pi
+    
+    a = dv / config.sim_ts  # Since dv = a * dt => a = dv / dt
+    omega = dtheta / config.sim_ts  # Change in angle over time step
+    
+    return np.expand_dims(np.array([a, omega]), 1)
+
+
+def aw_to_axay_control_xyvxvy(control, state, epsilon=1e-8):
+    a = control[0][0]
+    omega = control[1][0]
+    x = state[0]
+    y = state[1]
+    vx = state[2]
+    vy = state[3]
+    
+    v = np.sqrt(vx**2 + vy**2)
+
+    # If velocity is zero, assume default orientation along the x-axis
+    ax = a
+    ay = 0.0
+
+    if v > epsilon:
+        cos_theta = vx / v
+        sin_theta = vy / v
+        ax = a * cos_theta - vy * omega
+        ay = a * sin_theta + vx * omega
+    
+    
+    return np.expand_dims(np.array([ax, ay]), 1)
+    
