@@ -89,6 +89,18 @@ class Environment:
         B[1, 1] = a*cos(x[2])
         return A, B
     
+    """Defines the system input matrices A and B for double-integrator dynamics."""
+    @staticmethod
+    def get_double_integrator_dynamics_np(x):
+        A = np.zeros((4,))
+        A[0] = x[3] * np.cos(x[2]) # x_dot = v * cos(theta)
+        A[1] = x[3] * np.sin(x[2]) # y_dot = v * sin(theta)
+
+        B = np.zeros((4, 2))
+        B[2, 0] = 1 # dtheta = omega
+        B[3, 1] = 1 # dv = a
+        return A, B
+    
     @staticmethod
     def get_double_integrator_dynamics_macbf(x):
         """
@@ -127,55 +139,6 @@ class Environment:
         B[3, 1] = 1
         return A, B
 
-
-    """Defines the system input matrices A and B for double-integrator dynamics."""
-    @staticmethod
-    def get_double_integrator_dynamics_np(x):
-        A = np.zeros((4,))
-        A[0] = x[3] * np.cos(x[2]) # x_dot = v * cos(theta)
-        A[1] = x[3] * np.sin(x[2]) # y_dot = v * sin(theta)
-
-        B = np.zeros((4, 2))
-        B[2, 0] = 1 # dtheta = omega
-        B[3, 1] = 1 # dv = a
-        return A, B
-
-    """Defines the system input matrices A and B for double-integrator dynamics."""
-    @staticmethod
-    def get_double_integrator_dynamics_np(x):
-        A = np.zeros((4,))
-        A[0] = x[3] * np.cos(x[2]) # x_dot = v * cos(theta)
-        A[1] = x[3] * np.sin(x[2]) # y_dot = v * sin(theta)
-
-        B = np.zeros((4, 2))
-        B[2, 0] = 1 # dtheta = omega
-        B[3, 1] = 1 # dv = a
-        return A, B
-
-    """Defines the system input matrices A and B for double-integrator dynamics."""
-    @staticmethod
-    def get_double_integrator_dynamics_np(x):
-        A = np.zeros((4,))
-        A[0] = x[3] * np.cos(x[2]) # x_dot = v * cos(theta)
-        A[1] = x[3] * np.sin(x[2]) # y_dot = v * sin(theta)
-
-        B = np.zeros((4, 2))
-        B[2, 0] = 1 # dtheta = omega
-        B[3, 1] = 1 # dv = a
-        return A, B
-
-    """Defines the system input matrices A and B for double-integrator dynamics."""
-    @staticmethod
-    def get_double_integrator_dynamics_np(x):
-        A = np.zeros((4,))
-        A[0] = x[3] * np.cos(x[2]) # x_dot = v * cos(theta)
-        A[1] = x[3] * np.sin(x[2]) # y_dot = v * sin(theta)
-
-        B = np.zeros((4, 2))
-        B[2, 0] = 1 # dtheta = omega
-        B[3, 1] = 1 # dv = a
-        return A, B
-
     """Configures the simulator."""
     def define_simulator(self):
         simulator = do_mpc.simulator.Simulator(self.model)
@@ -190,10 +153,8 @@ class Environment:
         self.simulator.x0 = x0
     
     def apply_state_lims(self, state):
-
         if not config.apply_state_limit:
             return state
-
         if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
             speed = np.linalg.norm(state[2:])
             if speed > config.v_limit and speed > 1e-8:
@@ -210,10 +171,8 @@ class Environment:
 
 
     def apply_control_lims(self, control, state):
-
         if not config.apply_control_limit:
             return control
-
         if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
             control = axay_to_aw_control_xyvxvy(control, state)
         if control[0][0] > config.omega_limit:
@@ -224,7 +183,6 @@ class Environment:
             control[1][0] = config.accel_limit
         if control[1][0] < -config.accel_limit:
             control[1][0] = -config.accel_limit
-        
         if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
             control = aw_to_axay_control_xyvxvy(control, state)
         return control

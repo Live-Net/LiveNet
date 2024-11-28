@@ -28,8 +28,8 @@ ani_save_name = 'TEST.mp4'
 
 # dynamics = DynamicsModel.SINGLE_INTEGRATOR
 # dynamics = DynamicsModel.DOUBLE_INTEGRATOR
-# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
-dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
+dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
+# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
 
 mpc_p0_faster = True
 agent_zero_offset = 0
