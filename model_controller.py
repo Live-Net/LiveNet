@@ -3,7 +3,7 @@ import config
 import numpy as np
 from model_utils import ModelDefinition
 from models import FCNet, BarrierNet
-from util import perturb_model_input, axay_to_aw_control
+from util import perturb_model_input
 
 
 class ModelController:

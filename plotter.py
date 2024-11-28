@@ -7,8 +7,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import patches
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
 
 def quit_figure(event):
     if event.key == 'q':
@@ -47,66 +45,7 @@ class Plotter:
             plt.waitforbuttonpress()
 
 
-    # # Add this to your update method
-    # def update(self, frame):
-    #     self.ax.clear()
-
-    #     frame *= config.plot_rate
-
-    #     plot_x_bounds = max(self.scenario.plot_bounds[:, 0]) - min(self.scenario.plot_bounds[:, 0])
-    #     plot_y_bounds = max(self.scenario.plot_bounds[:, 1]) - min(self.scenario.plot_bounds[:, 1])
-    #     ratio = plot_x_bounds / plot_y_bounds
-    #     height = 5
-    #     width = int(round(ratio * height))
-    #     self.fig.set_figwidth(width)
-    #     self.fig.set_figheight(height)
-
-    #     # Redraw static elements
-    #     self.scenario.plot(self.ax)
-
-    #     # Reset plot limits and other properties as needed
-    #     self.ax.set_xlim(min(self.scenario.plot_bounds[:, 0]), max(self.scenario.plot_bounds[:, 0]))
-    #     self.ax.set_ylim(min(self.scenario.plot_bounds[:, 1]), max(self.scenario.plot_bounds[:, 1]))
-
-    #     # Determine the start index for the fading effect
-    #     trail_length = 100
-    #     start_index = max(0, frame - trail_length)  # Adjust 'trail_length' to control trail size
-    #     if start_index == 0:
-    #         trail_length = frame
-
-    #     # Create a color map for the fading trails
-    #     cmap = cm.get_cmap('cool')  # You can use other colormaps like 'plasma', 'cool', etc.
-    #     norm = mcolors.Normalize(vmin=start_index, vmax=frame)
-
-    #     # Draw the fading trails for agents 1 and 2
-    #     for i in range(start_index, frame - 1, config.plot_rate):
-    #         alpha = 1 - ((frame - 1 - i) / trail_length) ** 2
-    #         color = cmap(norm(i))
-
-    #         # Draw fading trails with dynamic colors
-    #         self.ax.plot(self.x_cum[0][i:i + 2, 0], self.x_cum[0][i:i + 2, 1], color=color, alpha=alpha, linewidth=5)
-    #         self.ax.plot(self.x_cum[1][i:i + 2, 0], self.x_cum[1][i:i + 2, 1], color=color, alpha=alpha, linewidth=5)
-
-    #         # Plot real-sized objects with fading colors
-    #         circle = patches.Circle(self.x_cum[0][i, :2], config.agent_radius, linewidth=1, edgecolor=color, 
-    #                                 facecolor=color, fill=True, alpha=alpha)
-    #         self.ax.add_patch(circle)
-    #         circle = patches.Circle(self.x_cum[1][i, :2], config.agent_radius, linewidth=1, edgecolor=color, 
-    #                                 facecolor=color, fill=True, alpha=alpha)
-    #         self.ax.add_patch(circle)
-
-
-    #     if config.plot_arrows:
-    #         pos_diff, vel_diff = self.metrics[frame][2], self.metrics[frame][3] * -3.0
-    #         print(pos_diff, vel_diff)
-    #         self.ax.arrow(0, 0, pos_diff[0], pos_diff[1], head_width=0.05, head_length=0.1, fc='green', ec='green', label='Position difference')
-    #         self.ax.arrow(0, 0, vel_diff[0], vel_diff[1], head_width=0.05, head_length=0.1, fc='orange', ec='orange', label='Velocity difference')
-        
-    #     return []
-
     # Function to update the plots
-    # Function to update the plots
-
     def update(self, frame):
         self.ax.clear()
 
@@ -128,20 +67,22 @@ class Plotter:
         self.ax.set_xlim(min(self.scenario.plot_bounds[:, 0]), max(self.scenario.plot_bounds[:, 0]))
         self.ax.set_ylim(min(self.scenario.plot_bounds[:, 1]), max(self.scenario.plot_bounds[:, 1]))
 
-        # Extract metrics for liveliness text
+        u0, u1 = np.round(self.u_cum[0][frame], 2), np.round(self.u_cum[1][frame], 2)
         try:
             L = np.round(self.metrics[frame][0], 2)
-            ttc = np.round(self.metrics[frame][1], 2)
+            ttc= np.round(self.metrics[frame][1], 2)
             intersects = self.metrics[frame][4]
             is_live = self.metrics[frame][5]
         except Exception as e:
             print(e)
-            L, ttc, intersects, is_live = 0, 0, False, False
-
+            L = 0
+            ttc = 0
+            intersects = False
+            is_live = False
         x0_state, x1_state = self.x_cum[0][frame].T.copy(), self.x_cum[1][frame].T.copy()
         x0_state[2] = np.rad2deg(x0_state[2])
+        x1_state = self.x_cum[1][frame].T.copy()
         x1_state[2] = np.rad2deg(x1_state[2])
-
         agent_dist = np.linalg.norm(x0_state[:2] - x1_state[:2])
         opp_collides = agent_dist < config.agent_radius * 2 + config.safety_dist
         closest_obs_dists = []
@@ -187,22 +128,18 @@ class Plotter:
             # Plot real-sized objects.
             circle = patches.Circle(self.x_cum[0][i, :2], config.agent_radius, linewidth=1, edgecolor='r', facecolor='r', fill=True, alpha=alpha)
             self.ax.add_patch(circle)
-
-            circle = patches.Circle(self.x_cum[1][i, :2], config.agent_radius, linewidth=0.5,
-                                    edgecolor='b', facecolor='b', alpha=alpha)
+            circle = patches.Circle(self.x_cum[1][i, :2], config.agent_radius, linewidth=1, edgecolor='b', facecolor='b', fill=True, alpha=alpha)
             self.ax.add_patch(circle)
+            # self.ax.arrow(x0_state[0], x0_state[1], math.cos(np.deg2rad(x0_state[2])) * x0_state[3] * 10.0, math.sin(np.deg2rad(x0_state[2])) * x0_state[3] * 10.0, head_width=0.05, head_length=0.1, fc='red', ec='red')
+            # self.ax.arrow(x1_state[0], x1_state[1], math.cos(np.deg2rad(x1_state[2])) * x1_state[3] * 10.0, math.sin(np.deg2rad(x1_state[2])) * x1_state[3] * 10.0, head_width=0.05, head_length=0.1, fc='blue', ec='blue')
 
-        # Plot current agent positions
-        circle = patches.Circle(self.x_cum[0][frame, :2], config.agent_radius, linewidth=1,
-                                edgecolor='r', facecolor='r', alpha=1.0)
-        self.ax.add_patch(circle)
-
-        circle = patches.Circle(self.x_cum[1][frame, :2], config.agent_radius, linewidth=1,
-                                edgecolor='b', facecolor='b', alpha=1.0)
-        self.ax.add_patch(circle)
-
+        if config.plot_arrows:
+            pos_diff, vel_diff = self.metrics[frame][2], self.metrics[frame][3] * -3.0
+            print(pos_diff, vel_diff)
+            self.ax.arrow(0, 0, pos_diff[0], pos_diff[1], head_width=0.05, head_length=0.1, fc='green', ec='green', label='Position difference')
+            self.ax.arrow(0, 0, vel_diff[0], vel_diff[1], head_width=0.05, head_length=0.1, fc='orange', ec='orange', label='Velocity difference')
+        
         return []
-
 
 
     def plot(self, scenario, x_cum, u_cum, metrics):
@@ -280,5 +217,4 @@ class Plotter:
         plt.tight_layout()
         plt.show()
         plt.show()
-
 

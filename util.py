@@ -201,33 +201,7 @@ def perturb_model_input(inputs, scenario_obstacles, num_total_opponents, x_is_d_
     return inputs
 
 
-def aw_to_axay_control(state, control):
-    vx = state[3] * np.cos(state[2])
-    vy = state[3] * np.sin(state[2])
-    
-    new_vx = (state[3] + control[1]) * np.cos((state[2] + control[0]))
-    new_vy = (state[3] + control[1]) * np.sin((state[2] + control[0]))
-
-    dvx, dvy = new_vx - vx, new_vy - vy
-    ax, ay = dvx, dvy
-
-    return ax, ay
-
-
-def axay_to_aw_control(state, control):
-    vx = state[3] * np.cos(state[2])
-    vy = state[3] * np.sin(state[2])
-    new_vx, new_vy = vx + control[0], vy + control[1]
-    dv = np.sqrt((new_vx - vx) ** 2 + (new_vy - vy) ** 2)
-    dtheta = np.arctan2(new_vy, new_vx) - np.arctan2(vy, vx)
-    if dtheta < np.pi:
-        dtheta += 2.0 * np.pi
-    
-    a, w = dv, dtheta
-    return np.array([a, w])
-
-
-def axay_to_aw_control_xyvxvy(control, state):    
+def axay_to_aw_control(control, state):    
     vx = state[2]
     vy = state[3]
     ax = control[0][0]
@@ -260,7 +234,7 @@ def axay_to_aw_control_xyvxvy(control, state):
     return np.expand_dims(np.array([a, omega]), 1)
 
 
-def aw_to_axay_control_xyvxvy(control, state, epsilon=1e-8):
+def aw_to_axay_control(control, state, epsilon=1e-8):
     a = control[0][0]
     omega = control[1][0]
     x = state[0]
@@ -283,3 +257,44 @@ def aw_to_axay_control_xyvxvy(control, state, epsilon=1e-8):
     
     return np.expand_dims(np.array([ax, ay]), 1)
     
+
+def vomega_to_vxvy_state(vomega_state):
+    x = vomega_state[0]
+    y = vomega_state[1]
+    omega = vomega_state[2]
+    v = vomega_state[3]
+    vx = v * np.cos(omega)
+    vy = v * np.sin(omega)
+    return np.array([x, y, vx, vy])
+    
+
+
+
+
+
+''' LEGACY '''
+
+# def aw_to_axay_control(state, control):
+#     vx = state[3] * np.cos(state[2])
+#     vy = state[3] * np.sin(state[2])
+    
+#     new_vx = (state[3] + control[1]) * np.cos((state[2] + control[0]))
+#     new_vy = (state[3] + control[1]) * np.sin((state[2] + control[0]))
+
+#     dvx, dvy = new_vx - vx, new_vy - vy
+#     ax, ay = dvx, dvy
+
+#     return ax, ay
+
+
+# def axay_to_aw_control(state, control):
+#     vx = state[3] * np.cos(state[2])
+#     vy = state[3] * np.sin(state[2])
+#     new_vx, new_vy = vx + control[0], vy + control[1]
+#     dv = np.sqrt((new_vx - vx) ** 2 + (new_vy - vy) ** 2)
+#     dtheta = np.arctan2(new_vy, new_vx) - np.arctan2(vy, vx)
+#     if dtheta < np.pi:
+#         dtheta += 2.0 * np.pi
+    
+#     a, w = dv, dtheta
+#     return np.array([a, w])

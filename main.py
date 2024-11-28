@@ -48,7 +48,8 @@ config.ani_save_name = "TEST.mp4"
 
 plotter = Plotter()
 # plotter = None
-logger = BlankLogger()
+# logger = BlankLogger()
+logger = None
 
 # Add all initial and goal positions of the agents here (Format: [x, y, theta])
 goals = scenario.goals.copy()
@@ -65,16 +66,16 @@ controllers = []
 # controllers.append(ModelController("weights/model_30_norm_intersuite2_lfnew_so_ego_0_1_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy())) # Intersection livenet
 
 # controllers.append(MPC(agent_idx=0, opp_gamma=config.opp_gamma, obs_gamma=config.obs_gamma, live_gamma=config.liveliness_gamma, liveness_thresh=config.liveness_threshold, goal=goals[0,:], static_obs=scenario.obstacles.copy(), delay_start=delay_start))
-# controllers.append(macbf_torch_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
-controllers.append(pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
+controllers.append(macbf_torch_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
+# controllers.append(pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]))
 
 # Setup agent 1
 # controllers.append(MPC(agent_idx=1, opp_gamma=config.opp_gamma, obs_gamma=config.obs_gamma, live_gamma=config.liveliness_gamma, liveness_thresh=config.liveness_threshold, goal=goals[1,:], static_obs=scenario.obstacles.copy()))
 # controllers.append(ModelController("weights/model_base_single_input_obs_wc_nolim_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy()))
 # controllers.append(ModelController("weights/model3_25_smgbin_l_w_lims_opp_pen_dgoal_fixo_obs_l_suite_multi_0_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy()))
-# controllers.append(macbf_torch_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
+controllers.append(macbf_torch_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
 # controllers.append(BlankController())
-controllers.append(pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
+# controllers.append(pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:]))
 # controllers.append(MPC(agent_idx=1, opp_gamma=config.opp_gamma, obs_gamma=config.obs_gamma, live_gamma=config.liveliness_gamma, liveness_thresh=config.liveness_threshold, goal=goals[1,:], static_obs=scenario.obstacles.copy()))
 
 # WORKING

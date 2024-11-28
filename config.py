@@ -28,8 +28,8 @@ ani_save_name = 'TEST.mp4'
 
 # dynamics = DynamicsModel.SINGLE_INTEGRATOR
 # dynamics = DynamicsModel.DOUBLE_INTEGRATOR
-# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
-dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
+dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
+# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
 
 mpc_p0_faster = True
 agent_zero_offset = 0
@@ -84,8 +84,8 @@ agent_radius = 0.1                         # Robot radius (for obstacle avoidanc
 zeta = 3.0
 
 # Actuator limits
-apply_control_limit = False
-apply_state_limit = False
+apply_control_limit = True
+apply_state_limit = True
 v_limit = 0.30                             # Linear velocity limit
 omega_limit = 0.5                          # Angular velocity limit
 accel_limit = 0.1
