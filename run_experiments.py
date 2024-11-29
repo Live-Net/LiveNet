@@ -6,37 +6,43 @@
 # N is number of iterations for one time horizon
 # mpc_cbf.py containst eh code for the Game thereotic MPC controllers for agent 1 and 2 respectively
 
-import sys
-import os
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-pic_dir = os.path.join(current_dir, 'PIC')
-sys.path.insert(0, pic_dir)
-sys.path.insert(0, os.path.join(pic_dir, 'maddpg'))
-sys.path.insert(0, os.path.join(pic_dir, 'models'))
-
 import config
+
+if config.dynamics == config.DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+    import sys
+    import os
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    pic_dir = os.path.join(current_dir, 'PIC')
+    sys.path.insert(0, pic_dir)
+    sys.path.insert(0, os.path.join(pic_dir, 'maddpg'))
+    sys.path.insert(0, os.path.join(pic_dir, 'models'))
+
+
 import numpy as np
 from metrics import gather_all_metric_data, load_desired_path
 from mpc_cbf import MPC
 from scenarios import DoorwayScenario, IntersectionScenario
 from data_logger import BlankLogger, DataLogger
 from environment import Environment
-# from model_controller import ModelController
+from model_controller import ModelController
 from PIC_controller import pic_controller
 from simulation import run_simulation
+from macbf_torch_controller import macbf_torch_controller
 from plotter import Plotter
 
-# SCENARIO = 'Doorway'
-SCENARIO = 'Intersection'
 
-SCENARIO = 'Intersection'
-RUN_AGENT = 'PIC'
-# RUN_AGENT = 'MPC_UNLIVE'
-# RUN_AGENT = 'BarrierNet'
-# RUN_AGENT = 'LiveNet'
+SCENARIO = 'Doorway'
+# SCENARIO = 'Intersection'
 
-SIM_RESULTS_MODE = False
+# AGENT = 'MPC'
+# AGENT = 'MPC_UNLIVE'
+# AGENT = 'BarrierNet'
+# AGENT = 'LiveNet'
+AGENT = 'MACBF'
+# AGENT = 'PIC'
+
+SIM_RESULTS_MODE = True
 
 NUM_SIMS = 50
 
@@ -79,6 +85,7 @@ def get_mpc_unlive_controllers(scenario):
 
 
 def get_macbf_controllers(scenario):
+    goals = scenario.goals.copy()
     controllers = [
         macbf_torch_controller("test", static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
         macbf_torch_controller("test2", static_obs=scenario.obstacles.copy(), goal=goals[1,:])
@@ -87,6 +94,7 @@ def get_macbf_controllers(scenario):
 
 
 def get_pic_controllers(scenario):
+    goals = scenario.goals.copy()
     controllers = [
         pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
         pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:])
@@ -144,44 +152,45 @@ def get_scenario(scenario_type):
 
 if __name__ == '__main__':
     scenario = get_scenario(SCENARIO)
-    print(f"Running experiments on agent {RUN_AGENT} on scenario {SCENARIO}")
+    print(f"Running experiments on agent {AGENT} on scenario {SCENARIO}")
 
     all_metric_data = []
     for sim in range(NUM_SIMS if SIM_RESULTS_MODE else 1):
         plotter = None
-        # logger = BlankLogger() if SIM_RESULTS_MODE else DataLogger(f"experiment_results/histories/{RUN_AGENT}_{SCENARIO}.json")
-    logger = None
+        logger = BlankLogger() if SIM_RESULTS_MODE else DataLogger(f"experiment_results/histories/{AGENT}_{SCENARIO}.json")
+        # logger = None
 
         # Add all initial and goal positions of the agents here (Format: [x, y, theta])
         goals = scenario.goals.copy()
     
-    if logger:
-        logger.set_obstacles(scenario.obstacles.copy())
+        if logger:
+            logger.set_obstacles(scenario.obstacles.copy())
     
-    env = Environment(scenario.initial.copy(), scenario.goals.copy())
-        if RUN_AGENT == 'MPC':
+        env = Environment(scenario.initial.copy(), scenario.goals.copy())
+        if AGENT == 'MPC':
             controllers = get_mpc_live_controllers(scenario, True)
-        elelif RUN_AGENT == 'MACBF':
-            controllers = get_macbf_controllers(scenario)
-        elif RUN_AGENT == 'MPC_UNLIVE':
+        elif AGENT == 'MPC_UNLIVE':
             controllers = get_mpc_unlive_controllers(scenario)
-        elif RUN_AGENT == 'BarrierNet':
+        elif AGENT == 'BarrierNet':
             controllers = get_barriernet_controllers(scenario)
-        elif RUN_AGENT == 'LiveNet':
+        elif AGENT == 'LiveNet':
             controllers = get_livenet_controllers(scenario)
+        elif AGENT == 'MACBF':
+            controllers = get_macbf_controllers(scenario)
+        elif AGENT == "PIC":
+            controllers = get_pic_controllers(scenario)
 
-        env.compute_history = []    elif RUN_AGENT == "PIC":
-        controllers = get_pic_controllers(scenario)
+        env.compute_history = []    
 
         x_cum, u_cum = run_simulation(scenario, env, controllers, logger, plotter)
 
-    desired_path_0 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{RUN_AGENT}_0.json", 0)
-    desired_path_1 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{RUN_AGENT}_1.json", 1)
+    desired_path_0 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{AGENT}_0.json", 0)
+    desired_path_1 = load_desired_path(f"experiment_results/desired_paths/{SCENARIO}_{AGENT}_1.json", 1)
     metric_data = gather_all_metric_data(scenario, x_cum[0], x_cum[1], scenario.goals, env.compute_history, desired_path_0=desired_path_0, desired_path_1=desired_path_1)
     all_metric_data.append(metric_data)
 
     if SIM_RESULTS_MODE:
         all_metric_data = np.array(all_metric_data)
-        save_filename = f"experiment_results/{RUN_AGENT}_{SCENARIO}.csv"
+        save_filename = f"experiment_results/{AGENT}_{SCENARIO}.csv"
         print(f"Saving experiment results to {save_filename}")
         np.savetxt(save_filename, all_metric_data, fmt='%0.4f', delimiter=', ', header='goal_reach_idx0, goal_reach_idx1, min_agent_dist, traj_collision, obs_min_dist_0, obs_collision_0, obs_min_dist_1, obs_collision_1, delta_vel_0, delta_vel_1, path_dev_0, path_dev_1, avg_compute_0, avg_compute_1')

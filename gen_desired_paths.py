@@ -14,15 +14,19 @@ from blank_controller import BlankController
 from simulation import run_simulation
 from mpc_cbf import MPC
 from metrics import get_straight_line_desired_path
-from run_experiments import get_mpc_live_controllers, get_scenario, get_livenet_controllers
+from run_experiments import get_mpc_live_controllers, get_scenario, get_livenet_controllers, get_macbf_controllers, get_pic_controllers
 
 NUM_AGENTS = 2
 
-AGENT = "MPC"
-# AGENT = "LiveNet"
+SCENARIO = 'Doorway'
+# SCENARIO = 'Intersection'
 
-# SCENARIO = "Doorway"
-SCENARIO = "Intersection"
+# AGENT = 'MPC'
+# AGENT = 'MPC_UNLIVE'
+# AGENT = 'BarrierNet'
+# AGENT = 'LiveNet'
+AGENT = 'MACBF'
+# AGENT = 'PIC'
 
 scenario = get_scenario(SCENARIO)
 
@@ -55,12 +59,47 @@ for agent_idx in range(2):
             if agent_idx == 0:
                 scenario.initial[1][3] = 0.0
                 env.initial_states[1][3] = 0.0
+        elif AGENT == "MACBF":
+            controllers = get_macbf_controllers(scenario)
+            other_agent = 1 - agent_idx
+            scenario.initial[other_agent][2] = 0.0
+            scenario.initial[other_agent][3] = 0.0
+            env.initial_states[other_agent][2] = 0.0
+            env.initial_states[other_agent][3] = 0.0
+            controllers[other_agent] = BlankController()
+        elif AGENT == "PIC":
+            controllers = get_pic_controllers(scenario)
+            other_agent = 1 - agent_idx
+            scenario.initial[other_agent][2] = 0.0
+            scenario.initial[other_agent][3] = 0.0
+            env.initial_states[other_agent][2] = 0.0
+            env.initial_states[other_agent][3] = 0.0
+            controllers[other_agent] = BlankController()
+
+
 
     elif SCENARIO == "Intersection":
         if AGENT == "MPC" or AGENT == "LiveNet":
             controllers = get_mpc_live_controllers(scenario, config.mpc_p0_faster)
             other_agent = 1 - agent_idx
             scenario.initial[other_agent][3] = 0.0
+            env.initial_states[other_agent][3] = 0.0
+            controllers[other_agent] = BlankController()
+
+        elif AGENT == "MACBF":
+            controllers = get_macbf_controllers(scenario)
+            other_agent = 1 - agent_idx
+            scenario.initial[other_agent][2] = 0.0
+            scenario.initial[other_agent][3] = 0.0
+            env.initial_states[other_agent][2] = 0.0
+            env.initial_states[other_agent][3] = 0.0
+            controllers[other_agent] = BlankController()
+        elif AGENT == "PIC":
+            controllers = get_pic_controllers(scenario)
+            other_agent = 1 - agent_idx
+            scenario.initial[other_agent][2] = 0.0
+            scenario.initial[other_agent][3] = 0.0
+            env.initial_states[other_agent][2] = 0.0
             env.initial_states[other_agent][3] = 0.0
             controllers[other_agent] = BlankController()
 
