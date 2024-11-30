@@ -47,7 +47,7 @@ AGENT = 'PIC'
 
 SIM_RESULTS_MODE = True
 
-NUM_SIMS = 50
+NUM_SIMS = 1
 
 def get_mpc_live_controllers(scenario, zero_goes_faster):
     if SCENARIO == 'Doorway':

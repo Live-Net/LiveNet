@@ -23,13 +23,12 @@ plot_arrows = False
 plot_end = True
 plot_end_ani_only = True
 plot_text_on = False
-# plot_text_on = False
 ani_save_name = 'TEST.mp4'
 
 # dynamics = DynamicsModel.SINGLE_INTEGRATOR
 # dynamics = DynamicsModel.DOUBLE_INTEGRATOR
-dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
-# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
+# dynamics = DynamicsModel.DOUBLE_INTEGRATOR_MACBF
+dynamics = DynamicsModel.DOUBLE_INTEGRATOR_PIC
 
 mpc_p0_faster = True
 agent_zero_offset = 0
@@ -56,8 +55,6 @@ else:
 num_states = num_states
 num_controls = num_controls
 
-plot_text_on = True
-
 
 n = 2                                      # Number of agents
 runtime = 18.0                             # Total runtime [s]
@@ -83,9 +80,9 @@ safety_dist = 0.0                         # Safety distance
 agent_radius = 0.1                         # Robot radius (for obstacle avoidance)
 zeta = 3.0
 
-# Actuator limits
-apply_control_limit = True
-apply_state_limit = True
+# Actuator limits YOLO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+apply_control_limit = False
+apply_state_limit = False
 v_limit = 0.30                             # Linear velocity limit
 omega_limit = 0.5                          # Angular velocity limit
 accel_limit = 0.1

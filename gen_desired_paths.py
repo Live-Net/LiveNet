@@ -18,25 +18,25 @@ from run_experiments import get_mpc_live_controllers, get_scenario, get_livenet_
 
 NUM_AGENTS = 2
 
-# SCENARIO = 'Doorway'
-SCENARIO = 'Intersection'
+SCENARIO = 'Doorway'
+# SCENARIO = 'Intersection'
 
 # AGENT = 'MPC'
 # AGENT = 'MPC_UNLIVE'
 # AGENT = 'BarrierNet'
 # AGENT = 'LiveNet'
-AGENT = 'MACBF'
-# AGENT = 'PIC'
+# AGENT = 'MACBF'
+AGENT = 'PIC'
 
 scenario = get_scenario(SCENARIO)
 
-for agent_idx in range(1):
+for agent_idx in range(2):
     config.mpc_p0_faster = agent_idx == 0
     plotter = Plotter()
 
 
-    # config.ani_save_name = f"Desired_{SCENARIO}_{AGENT}_{agent_idx}.mp4"
-    config.ani_save_name = "MONKEY_TESTING.mp4"
+    config.ani_save_name = f"Desired_{SCENARIO}_{AGENT}_{agent_idx}.mp4"
+    # config.ani_save_name = "MONKEY_TESTING_MACBF.mp4"
 
     logger = DataLogger(f"experiment_results/desired_paths/{SCENARIO}_{AGENT}_{agent_idx}.json")
     logger.set_obstacles(scenario.obstacles.copy())
@@ -113,8 +113,5 @@ for agent_idx in range(1):
             env.initial_states[other_agent][2] = 0.0
             env.initial_states[other_agent][3] = 0.0
             controllers[other_agent] = BlankController()
-
-    print(f"scenario.initial: {scenario.initial}")
-    print(f"env.initial: {env.initial_states}")
-    exit(1)
+        
     run_simulation(scenario, env, controllers, logger, plotter)

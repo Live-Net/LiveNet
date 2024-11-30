@@ -55,18 +55,18 @@ class DoorwayScenario:
         self.obstacles = []
         self.obs_starting_y = 0.25
         self.obs_length = 1.0
-        for y in np.arange(self.obs_starting_y, 1.15, 0.1):
+        for y in np.arange(self.obs_starting_y, 2, 0.1):
             self.obstacles.append((self.ox, y, 0.1))
             self.obstacles.append((self.ox, -y, 0.1))
-        # self.plot_bounds = np.array([[-2.5, -1.0], [2.5, 1.0]])
-        self.plot_bounds = np.array([[-2.5, -1.5], [5.0, 1.5]])
+        # self.plot_bounds = np.array([[-2.5, -1.5], [5.0, 1.5]])
+        self.plot_bounds = np.array([[-1.5, -2], [2.5, 2]])
 
     def plot(self, ax):
         for obs_x, obs_y, r in self.obstacles:
             circle = patches.Circle((obs_x, obs_y), r, linewidth=1,edgecolor='k',facecolor='k',fill=True)
             ax.add_patch(circle)
-        ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=1000)
-        ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=1000)
+        ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=500)
+        ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=500)
         # ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=100)
         # ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=100)
 
