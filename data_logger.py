@@ -5,7 +5,9 @@ import config
 import numpy as np
 from util import perturb_model_input, calculate_all_metrics
 
-class Dataset(torch.utils.data.Dataset):
+
+# Custom implementation of Dataset for PyTorch 1.1
+class Dataset:
     # Characterizes a dataset for PyTorch
     def __init__(self, features, labels):
         self.features = features
@@ -19,7 +21,6 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         X = self.features[index]
         y = self.labels[index]
-
         return X, y
 
 
@@ -34,7 +35,6 @@ class DataLogger:
     def set_obstacles(self, obstacles):
         self.data['obstacles'] = obstacles
 
-
     def log_iteration(self, states, goals, controls, use_for_training, compute_times):
         states = [state.reshape(-1).tolist() for state in states]
         goals = [goal.reshape(-1).tolist() for goal in goals]
@@ -47,7 +47,6 @@ class DataLogger:
             'compute_times': compute_times,
         })
         json.dump(self.data, open(self.filename, 'w'))
-
 
     @staticmethod
     def load_file(filename):
@@ -65,7 +64,7 @@ class BlankLogger:
 
     def log_iteration(self, states, goals, controls, use_for_training, compute_times):
         pass
-
+    
 
 # Extracts inputs and outputs from data files.
 class DataGenerator:

@@ -115,6 +115,10 @@ class IntersectionScenario:
             self.initial = np.array([[0.0, -start, np.pi / 2, start_vel],
                                     [-start, 0.0, 0.0, start_vel]])
         elif config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_MACBF or config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+
+            print("Intersection Scenario right spot")
+            
+
             self.initial = np.array([[0.0, -start, start_vel * np.cos(np.pi / 2), start_vel * np.sin(np.pi / 2)],
                                     [-start, 0.0, start_vel * np.cos(0), start_vel * np.sin(0)]])
 

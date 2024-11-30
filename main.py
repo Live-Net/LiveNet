@@ -21,7 +21,7 @@ import config
 from mpc_cbf import MPC
 from scenarios import DoorwayScenario, NoObstacleDoorwayScenario, IntersectionScenario
 from plotter import Plotter 
-# from data_logger import BlankLogger
+from data_logger import BlankLogger
 from environment import Environment
 from blank_controller import BlankController
 # from model_controller import ModelController
@@ -36,20 +36,25 @@ from metrics import gather_all_metric_data
 
 # config.liveliness_gamma = 0.1
 # config.runtime = 15.0
-# scenario_params = (1.0, 1.0)
-# scenario = IntersectionScenario(start=scenario_params[0], goal=scenario_params[1], start_vel=0.3)
+scenario_params = (1.0, 1.0)
+scenario = IntersectionScenario(start=scenario_params[0], goal=scenario_params[1], start_vel=0.3)
 
-scenario_params = (-1.0, 0.5, 2.0, 0.15)
-scenario = DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True, initial_vel=0.3)
+# scenario_params = (-1.0, 0.5, 2.0, 0.15)
+# scenario = DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True, initial_vel=0.3)
 # scenario = DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True)
 # scenario.initial[0][3] = 0.0
-config.ani_save_name = "TEST.mp4"
+
+
+# config.ani_save_name = "PIC_INTERSECTION.mp4"
+config.ani_save_name = "MACBF_INTERSECTION.mp4"
+
+# config.ani_save_name = "PIC_DOORWAY.mp4"
+# config.ani_save_name = "MACBF_DOORWAY.mp4"
 
 
 plotter = Plotter()
 # plotter = None
-# logger = BlankLogger()
-logger = None
+logger = BlankLogger()
 
 # Add all initial and goal positions of the agents here (Format: [x, y, theta])
 goals = scenario.goals.copy()

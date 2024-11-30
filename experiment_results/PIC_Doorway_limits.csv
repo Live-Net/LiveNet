@@ -1,2 +1,2 @@
 # goal_reach_idx0, goal_reach_idx1, min_agent_dist, traj_collision, obs_min_dist_0, obs_collision_0, obs_min_dist_1, obs_collision_1, delta_vel_0, delta_vel_1, path_dev_0, path_dev_1, avg_compute_0, avg_compute_1
--1.0000, -1.0000, 0.0082, 1.0000, 0.0202, 1.0000, 0.1072, 1.0000, 0.1147, 0.0466, 0.0289, 0.0374, 0.0003, 0.0003
+-1.0000, -1.0000, 0.0261, 1.0000, 0.0339, 1.0000, 0.0377, 1.0000, 0.0017, 0.0020, 0.0498, 0.0673, 0.0003, 0.0003

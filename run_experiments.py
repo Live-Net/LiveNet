@@ -23,9 +23,12 @@ import numpy as np
 from metrics import gather_all_metric_data, load_desired_path
 from mpc_cbf import MPC
 from scenarios import DoorwayScenario, IntersectionScenario
+
+if not config.dynamics == config.DynamicsModel.DOUBLE_INTEGRATOR_PIC:
+    from model_controller import ModelController
+
 from data_logger import BlankLogger, DataLogger
 from environment import Environment
-from model_controller import ModelController
 from PIC_controller import pic_controller
 from simulation import run_simulation
 from macbf_torch_controller import macbf_torch_controller
@@ -39,8 +42,8 @@ SCENARIO = 'Doorway'
 # AGENT = 'MPC_UNLIVE'
 # AGENT = 'BarrierNet'
 # AGENT = 'LiveNet'
-AGENT = 'MACBF'
-# AGENT = 'PIC'
+# AGENT = 'MACBF'
+AGENT = 'PIC'
 
 SIM_RESULTS_MODE = True
 
@@ -102,14 +105,6 @@ def get_pic_controllers(scenario):
     return controllers
 
 
-def get_pic_controllers(scenario):
-    controllers = [
-        pic_controller('test', static_obs=scenario.obstacles.copy(), goal=goals[0,:]),
-        pic_controller('test1', static_obs=scenario.obstacles.copy(), goal=goals[1,:])
-    ]
-    return controllers
-
-
 def get_barriernet_controllers(scenario):
     if SCENARIO == 'Doorway':
         model_0_def = "weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1_bn_definition.json"
@@ -144,7 +139,6 @@ def get_livenet_controllers(scenario, scenario_type=SCENARIO):
 def get_scenario(scenario_type):
     if scenario_type == 'Doorway':
         scenario_params = (-1.0, 0.5, 2.0, 0.15)
-        # return DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3])
         return DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True, initial_vel=0.3)
     elif scenario_type == 'Intersection':
         return IntersectionScenario()
@@ -157,8 +151,8 @@ if __name__ == '__main__':
     all_metric_data = []
     for sim in range(NUM_SIMS if SIM_RESULTS_MODE else 1):
         plotter = None
+
         logger = BlankLogger() if SIM_RESULTS_MODE else DataLogger(f"experiment_results/histories/{AGENT}_{SCENARIO}.json")
-        # logger = None
 
         # Add all initial and goal positions of the agents here (Format: [x, y, theta])
         goals = scenario.goals.copy()
@@ -191,6 +185,6 @@ if __name__ == '__main__':
 
     if SIM_RESULTS_MODE:
         all_metric_data = np.array(all_metric_data)
-        save_filename = f"experiment_results/{AGENT}_{SCENARIO}.csv"
+        save_filename = f"experiment_results/{AGENT}_{SCENARIO}_limits.csv"
         print(f"Saving experiment results to {save_filename}")
         np.savetxt(save_filename, all_metric_data, fmt='%0.4f', delimiter=', ', header='goal_reach_idx0, goal_reach_idx1, min_agent_dist, traj_collision, obs_min_dist_0, obs_collision_0, obs_min_dist_1, obs_collision_1, delta_vel_0, delta_vel_1, path_dev_0, path_dev_1, avg_compute_0, avg_compute_1')

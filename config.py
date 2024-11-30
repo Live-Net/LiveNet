@@ -15,14 +15,14 @@ class DynamicsModel(Enum):
 liveliness = True
 liveness_threshold = 0.7
 plot_rate = 1
-plot_live = True
+plot_live = False
 plot_live_pause_iteration = None
 # plot_live_pause_iteration = 0
 # plot_live_pause_iteration = 85
 plot_arrows = False
 plot_end = True
 plot_end_ani_only = True
-plot_text_on = True
+plot_text_on = False
 # plot_text_on = False
 ani_save_name = 'TEST.mp4'
 
@@ -84,8 +84,8 @@ agent_radius = 0.1                         # Robot radius (for obstacle avoidanc
 zeta = 3.0
 
 # Actuator limits
-apply_control_limit = False
-apply_state_limit = False
+apply_control_limit = True
+apply_state_limit = True
 v_limit = 0.30                             # Linear velocity limit
 omega_limit = 0.5                          # Angular velocity limit
 accel_limit = 0.1
