@@ -51,14 +51,17 @@ class BarrierNet(nn.Module):
         if self.model_definition.sep_pen_for_each_obs:
             self.num_obs_hiddens = self.model_definition.n_opponents
         
-        self.fc_obs_1 = []
-        self.fc_obs_2 = []
-        for _ in range(self.num_obs_hiddens):
-            self.fc_obs_1.append(nn.Linear(model_definition.nHidden1, model_definition.nHidden22).double())
-            self.fc_obs_2.append(nn.Linear(model_definition.nHidden22, N_CL).double())
+        self.fc22 = nn.Linear(model_definition.nHidden1, model_definition.nHidden22).double()
+        self.fc32 = nn.Linear(model_definition.nHidden22, N_CL).double()
 
-        self.fc_obs_1_list = nn.ModuleList(self.fc_obs_1)
-        self.fc_obs_2_list = nn.ModuleList(self.fc_obs_2)
+        # self.fc_obs_1 = []
+        # self.fc_obs_2 = []
+        # for _ in range(self.num_obs_hiddens):
+        #     self.fc_obs_1.append(nn.Linear(model_definition.nHidden1, model_definition.nHidden22).double())
+        #     self.fc_obs_2.append(nn.Linear(model_definition.nHidden22, N_CL).double())
+
+        # self.fc_obs_1_list = nn.ModuleList(self.fc_obs_1)
+        # self.fc_obs_2_list = nn.ModuleList(self.fc_obs_2)
 
         if self.model_definition.add_liveness_filter:
             self.fc24 = nn.Linear(model_definition.nHidden1, model_definition.nHidden24).double()
@@ -84,7 +87,8 @@ class BarrierNet(nn.Module):
         x31 = self.fc31(x21)
 
         x3obs = []
-        for fc22, fc32 in zip(self.fc_obs_1_list, self.fc_obs_2_list):
+        # for fc22, fc32 in zip(self.fc_obs_1_list, self.fc_obs_2_list):
+        for fc22, fc32 in [(self.fc22, self.fc32)]:
             x22 = F.relu(fc22(x))
             x32 = fc32(x22)
             x32 = 4*nn.Sigmoid()(x32)  # ensure CBF parameters are positive

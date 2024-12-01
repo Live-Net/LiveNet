@@ -20,10 +20,10 @@ from plotter import Plotter
 # SCENARIO = 'Doorway'
 SCENARIO = 'Intersection'
 
-# RUN_AGENT = 'MPC'
+RUN_AGENT = 'MPC'
 # RUN_AGENT = 'MPC_UNLIVE'
 # RUN_AGENT = 'BarrierNet'
-RUN_AGENT = 'LiveNet'
+# RUN_AGENT = 'LiveNet'
 
 SIM_RESULTS_MODE = False
 
@@ -104,7 +104,7 @@ def get_scenario(scenario_type):
         # return DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3])
         return DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True, initial_vel=0.3)
     elif scenario_type == 'Intersection':
-        return IntersectionScenario(start_vel=0.3)
+        return IntersectionScenario(start_vel=0.0)
 
 
 if __name__ == '__main__':
