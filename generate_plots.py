@@ -5,8 +5,12 @@ from data_logger import DataLogger
 from run_experiments import get_scenario
 from util import get_ray_intersection_point
 import matplotlib.pyplot as plt
+import matplotlib
 
-COLORS = ['orange', 'blue', 'magenta']
+matplotlib.rcParams.update({'font.size': 14})
+
+COLORS = ['firebrick', 'blue', 'magenta']
+LIGHT_COLORS = ['sandybrown', 'cornflowerblue']
 
 # SCENARIO = 'Doorway'
 SCENARIO = 'Intersection'
@@ -42,8 +46,17 @@ def gen_figure(ys, title, labels, ylabel, filesuffix, ylims=None, add_dotted=Non
     figcount += 1
     plt.title(title)
     for i, (y, label) in enumerate(zip(ys, labels)):
-        plt.plot(y, label = label, color=COLORS[i])
-    
+        if verticalline is None:
+            plt.plot(y, label = label, color=COLORS[i])
+        else:
+            break_val = verticalline[0]
+            plt.plot(y[:break_val + 1], label = label + " Before Cross", color=LIGHT_COLORS[i], linestyle='--', linewidth=2.0)
+            plt.plot([None] * break_val + y[break_val:], label = label + " After Cross", color=COLORS[i], linewidth=2.0)
+
+    if verticalline is not None:
+        break_val = verticalline[0]
+        plt.axvline(x=break_val, color='k', linestyle='--', linewidth=2.0, label="Crossing Point")
+
     if ylims is not None:
         plt.ylim(ylims)
 
@@ -51,18 +64,19 @@ def gen_figure(ys, title, labels, ylabel, filesuffix, ylims=None, add_dotted=Non
         val, label = add_dotted
         plt.plot([val if i is not None else None for i in ys[0]], label=label, linestyle='--', color='red')
 
-    if verticalline is not None:
-        val, label = verticalline
-        xmin, xmax = plt.gca().get_xlim()
-        ymin, ymax = plt.gca().get_ylim()
-        plt.fill_between(range(int(xmin) - 1, val + 1), ymin, ymax, alpha=0.5, color='darkred', label="Before Crossing")
-        plt.fill_between(range(val, int(xmax) + 2), ymin, ymax, alpha=0.5, color='green', label="After Crossing")
-        plt.gca().set_ylim([ymin, ymax])
-        plt.gca().set_xlim([xmin, xmax])
+    # if verticalline is not None:
+        # val, label = verticalline
+        # xmin, xmax = plt.gca().get_xlim()
+        # ymin, ymax = plt.gca().get_ylim()
+        # plt.fill_between(range(int(xmin) - 1, val + 1), ymin, ymax, alpha=0.5, color='darkred', label="Before Crossing")
+        # plt.fill_between(range(val, int(xmax) + 2), ymin, ymax, alpha=0.5, color='green', label="After Crossing")
+        # plt.gca().set_ylim([ymin, ymax])
+        # plt.gca().set_xlim([xmin, xmax])
 
     plt.ylabel(ylabel)
     plt.xlabel('Iteration')
-    plt.legend()
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.tight_layout()
 
     plt.savefig(f'experiment_results/histories/{RUN_AGENT}_{SCENARIO}_{filesuffix}.png')
     print("Saved plot to", f"experiment_results/histories/{RUN_AGENT}_{SCENARIO}_{filesuffix}.png")
@@ -73,14 +87,15 @@ def gen_traj_plot(desireds, trajs, labels, title, filesuffix, plot_skip = 3):
     figcount += 1
     plt.title(title)
     for i, (desired, traj, label) in enumerate(zip(desireds, trajs, labels)):
-        plt.plot(desired[:, 0], desired[:, 1], linestyle='--', label = label, color=COLORS[i])
-        plt.scatter(traj[::plot_skip, 0], traj[::plot_skip, 1], label = label, color=COLORS[i])
+        plt.plot(desired[:, 0], desired[:, 1], linestyle='--', label = label + " Desired", color=COLORS[i])
+        plt.scatter(traj[::plot_skip, 0], traj[::plot_skip, 1], label = label + " Taken", color=COLORS[i])
         plt.scatter([traj[-1][0]], [traj[-1][1]], marker='x', s=300, color=COLORS[i])
 
     plt.ylabel('Y (m)')
     plt.xlabel('X (m)')
-    plt.legend()
+    plt.legend(loc='upper right')
 
+    plt.tight_layout()
     plt.savefig(f'experiment_results/desired_paths/{RUN_AGENT}_{SCENARIO}_{filesuffix}.png')
     print("Saved plot to", f"experiment_results/desired_paths/{RUN_AGENT}_{SCENARIO}_{filesuffix}.png")
 
@@ -121,12 +136,12 @@ for iteration in logger.data['iterations']:
 
     liveness_cbf_vals.append(get_liveness_cbf(ego_state, opp_state, first_reached_goal < second_reached_goal))
 
-liveness_last_idx = liveness_cbf_vals.index(None)
+liveness_last_idx = liveness_cbf_vals[1:].index(None) + 1
 liveness_ylim = 0.6 if SCENARIO == "Doorway" else 5.0
 
-first_name = "Faster" if first_reached_goal < second_reached_goal else "Slower"
-second_name = "Slower" if first_reached_goal < second_reached_goal else "Faster"
-gen_figure([vels_0, vels_1], "Agent Velocity", [f'{first_name} Agent', f'{second_name} Agent'], "Agent Velocity (m/s)", "velocities", verticalline=(liveness_last_idx, "Last Intersecting Trajectories"))
-gen_figure([obs_dist_vals_0, obs_dist_vals_1, opp_dist_vals], "Distance CBF Violation", [f'{first_name} Agent Static Obstacle Distance', f'{second_name} Agent Static Obstacle Distance', 'Inter-Agent Distance'],  "Distance (m)", "distance_cbf", add_dotted=(0, 'CBF Boundary'), ylims=[-0.2, np.max([obs_dist_vals_0, obs_dist_vals_1, opp_dist_vals])])
+# first_name = "Faster" if first_reached_goal < second_reached_goal else "Slower"
+# second_name = "Slower" if first_reached_goal < second_reached_goal else "Faster"
+gen_figure([vels_0, vels_1], "Agent Velocity", [f'Agent 1', f'Agent 2'], "Agent Velocity (m/s)", "velocities", verticalline=(liveness_last_idx, "Last Intersecting Trajectories"))
+gen_figure([obs_dist_vals_0, obs_dist_vals_1, opp_dist_vals], "Distance CBF Violation", [f'Agent 1 Static Obstacle Distance', f'Agent 2 Static Obstacle Distance', 'Inter-Agent Distance'],  "Distance (m)", "distance_cbf", add_dotted=(0, 'CBF Boundary'), ylims=[-0.2, np.max([obs_dist_vals_0, obs_dist_vals_1, opp_dist_vals])])
 gen_figure([liveness_cbf_vals], "Liveness CBF Violation", [f'Agent Liveness'],  "Liveness (s)", "liveness_cbf", add_dotted=(0, 'CBF Boundary'), ylims=[-0.2, liveness_ylim])
-gen_traj_plot([desired0, desired1], [traj0, traj1], [f"{first_name} Agent", f"{second_name} Agent"], "Desired vs. Taken Trajectories", "desired")
+gen_traj_plot([desired0, desired1], [traj0, traj1], [f"Agent 1", f"Agent 2"], "Desired vs. Taken Trajectories", "desired")

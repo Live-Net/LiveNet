@@ -2,12 +2,12 @@ import config
 import numpy as np
 
 # AGENT = 'MPC'
-AGENT = 'MPC_UNLIVE'
-# AGENT = 'BarrierNet'
+# AGENT = 'MPC_UNLIVE'
+AGENT = 'BarrierNet'
 # AGENT = 'LiveNet'
 
-SCENARIO = 'Doorway'
-# SCENARIO = 'Intersection'
+# SCENARIO = 'Doorway'
+SCENARIO = 'Intersection'
 
 metrics = np.loadtxt(f'experiment_results/{AGENT}_{SCENARIO}.csv', delimiter=',')
 
