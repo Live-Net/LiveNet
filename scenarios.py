@@ -2,6 +2,7 @@ import config
 from config import DynamicsModel
 import numpy as np
 import matplotlib.patches as patches
+from util import vomega_to_vxvy_state
 
 # Add all initial and goal positions of the agents here (Format: [x, y, theta])
 
@@ -27,7 +28,7 @@ class DoorwayScenario:
         self.initial_y = initial_y
         self.goal_x = goal_x
         self.goal_y = goal_y
-        self.config = (initial_x, initial_y, goal_x, goal_y, start_facing_goal, initial_vel)
+        self.config = (initial_x, initial_y, goal_x, goal_y, start_facing_goal, initial_vel)        
         self.initial = np.array([[self.initial_x, self.initial_y, 0],
                     [self.initial_x, -self.initial_y, 0]])
         self.goals = np.array([[self.goal_x, -self.goal_y, 0.0],
@@ -35,28 +36,29 @@ class DoorwayScenario:
         if start_facing_goal:
             self.initial[0][2] = np.arctan2(self.goals[0][1] - self.initial[0][1], self.goals[0][0] - self.initial[0][0])
             self.initial[1][2] = np.arctan2(self.goals[1][1] - self.initial[1][1], self.goals[1][0] - self.initial[1][0])
-        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
-            # Set initial state to 0 velocity and goal to 0 velocity.
+            
+        if not config.dynamics == DynamicsModel.SINGLE_INTEGRATOR:  # Set initial state to 0 velocity and goal to 0 velocity.
             vels = np.ones((self.num_agents, 1)) * initial_vel
             zeros = np.zeros((self.num_agents, 1))
             self.initial = np.hstack((self.initial, vels))
             self.goals = np.hstack((self.goals, zeros))
+
         self.ox = 1
         self.obstacles = []
         self.obs_starting_y = 0.25
         self.obs_length = 1.0
-        for y in np.arange(self.obs_starting_y, 1.15, 0.1):
+        for y in np.arange(self.obs_starting_y, 2, 0.1):
             self.obstacles.append((self.ox, y, 0.1))
             self.obstacles.append((self.ox, -y, 0.1))
-        # self.plot_bounds = np.array([[-2.5, -1.0], [2.5, 1.0]])
-        self.plot_bounds = np.array([[-2.5, -1.5], [5.0, 1.5]])
+        # self.plot_bounds = np.array([[-2.5, -1.5], [5.0, 1.5]])
+        self.plot_bounds = np.array([[-1.5, -2], [2.5, 2]])
 
     def plot(self, ax):
         for obs_x, obs_y, r in self.obstacles:
             circle = patches.Circle((obs_x, obs_y), r, linewidth=1,edgecolor='k',facecolor='k',fill=True)
             ax.add_patch(circle)
-        ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=1000)
-        ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=1000)
+        ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=500)
+        ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=500)
         # ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=100)
         # ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=100)
 
@@ -100,8 +102,11 @@ class NoObstacleDoorwayScenario:
 
 class IntersectionScenario:
     def __init__(self, start=1.0, goal=1.0, start_vel=0.0):
-        self.initial = np.array([[0.0, -start, np.pi / 2, start_vel],
-                      [-start, 0.0, 0.0, start_vel]])
+
+        if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR:
+            self.initial = np.array([[0.0, -start, np.pi / 2, start_vel],
+                                    [-start, 0.0, 0.0, start_vel]])
+
         self.goals = np.array([[0.0, goal, np.pi / 2, 0.0],
                     [goal, 0.0, 0.0, 0.0]
                     ])

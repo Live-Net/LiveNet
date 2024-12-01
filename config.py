@@ -19,7 +19,7 @@ plot_live_pause_iteration = 0
 plot_arrows = False
 plot_end = True
 plot_end_ani_only = True
-plot_text_on = True
+plot_text_on = False
 # plot_text_on = False
 ani_save_name = 'TEST.mp4'
 
