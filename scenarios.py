@@ -2,7 +2,6 @@ import config
 from config import DynamicsModel
 import numpy as np
 import matplotlib.patches as patches
-from util import vomega_to_vxvy_state
 
 # Add all initial and goal positions of the agents here (Format: [x, y, theta])
 
