@@ -1,0 +1,16 @@
+# Editors
+*~
+*.el
+.idea
+.vscode
+
+# Build artifacts
+docs/
+#docs/build/
+#docs/source/_templates
+
+# Python
+venv/
+__pycache__
+
+agents_animation.mp4
