@@ -19,11 +19,11 @@ from metrics import gather_all_metric_data
 
 # config.liveliness_gamma = 0.1
 # config.runtime = 15.0
-scenario_params = (1.0, 1.0)
-scenario = IntersectionScenario(start=scenario_params[0], goal=scenario_params[1], start_vel=0.0)
+# scenario_params = (1.0, 1.0)
+# scenario = IntersectionScenario(start=scenario_params[0], goal=scenario_params[1], start_vel=0.0)
 
-# scenario_params = (-1.0, 0.5, 2.0, 0.15)
-# scenario = DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True, initial_vel=0.3)
+scenario_params = (-1.0, 0.5, 2.0, 0.15)
+scenario = DoorwayScenario(initial_x=scenario_params[0], initial_y=scenario_params[1], goal_x=scenario_params[2], goal_y=scenario_params[3], start_facing_goal=True, initial_vel=0.3)
 
 # scenario_params = (-1.0, 0.5, 2.0, 0.15, 0.0, True)
 # scenario_params = (-1.0, 0.4, 2.0, 0.35, 0.0, True)
@@ -49,7 +49,9 @@ controllers = []
 
 # WORKING
 # controllers.append(ModelController("weights/model_30_norm_doorsuite2_lfnew_0_1_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy())) # Doorway livenet
-controllers.append(ModelController("weights/model_30_norm_intersuite2_lfnew_so_ego_0_1_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy())) # Intersection livenet
+# controllers.append(ModelController("weights/model_30_norm_intersuite2_lfnew_so_ego_0_1_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy())) # Intersection livenet
+
+controllers.append(ModelController("weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy())) # Doorway BarrierNet
 
 # controllers.append(ModelController("weights/srikar_iter_5_3opp_od_0_1_bn_definition.json", goals[0], static_obs=scenario.obstacles.copy())) # Intersection livenet
 
@@ -62,7 +64,9 @@ controllers.append(ModelController("weights/model_30_norm_intersuite2_lfnew_so_e
 
 # WORKING
 # controllers.append(ModelController("weights/model_30_norm_doorsuite2_lfnew_0_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy())) # Doorway livenet
-controllers.append(ModelController("weights/model_30_norm_intersuite2_lfnew_so_ego_0_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy())) # Intersection livenet
+# controllers.append(ModelController("weights/model_30_norm_intersuite2_lfnew_so_ego_0_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy())) # Intersection livenet
+
+controllers.append(ModelController("weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy())) # Doorway BarrierNet
 
 # controllers.append(ModelController("weights/srikar_iter_5_3opp_od_0_1_bn_definition.json", goals[1], static_obs=scenario.obstacles.copy())) # Intersection livenet
 

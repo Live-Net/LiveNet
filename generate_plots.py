@@ -7,13 +7,13 @@ from util import get_ray_intersection_point
 import matplotlib.pyplot as plt
 import matplotlib
 
-matplotlib.rcParams.update({'font.size': 14})
+matplotlib.rcParams.update({'font.size': 18})
 
 COLORS = ['firebrick', 'blue', 'magenta']
 LIGHT_COLORS = ['sandybrown', 'cornflowerblue']
 
-# SCENARIO = 'Doorway'
-SCENARIO = 'Intersection'
+SCENARIO = 'Doorway'
+# SCENARIO = 'Intersection'
 
 RUN_AGENT = 'MPC'
 # RUN_AGENT = 'LiveNet'
@@ -44,25 +44,42 @@ def gen_figure(ys, title, labels, ylabel, filesuffix, ylims=None, add_dotted=Non
     global figcount
     plt.figure(figcount)
     figcount += 1
+    linewidth = 3.0
     plt.title(title)
     for i, (y, label) in enumerate(zip(ys, labels)):
         if verticalline is None:
             plt.plot(y, label = label, color=COLORS[i])
         else:
             break_val = verticalline[0]
-            plt.plot(y[:break_val + 1], label = label + " Before Cross", color=LIGHT_COLORS[i], linestyle='--', linewidth=2.0)
-            plt.plot([None] * break_val + y[break_val:], label = label + " After Cross", color=COLORS[i], linewidth=2.0)
+            # plt.plot(y[:break_val + 1], label = label + " Pre-Cross", color=LIGHT_COLORS[i], linestyle='--', linewidth=2.0)
+            # plt.plot([None] * break_val + y[break_val:], label = label + " Post-Cross", color=COLORS[i], linewidth=2.0)
+            plt.plot(y[:break_val + 1], label = label + " Before", color=LIGHT_COLORS[i], linestyle='--', linewidth=linewidth)
+            plt.plot([None] * break_val + y[break_val:], label = label + " After", color=COLORS[i], linewidth=linewidth)
+
+    # break_val = verticalline[0]
+    # y, label = ys[0], labels[0]
+    # plt.plot(y[:break_val + 1], label = label + " Pre-Cross", color=LIGHT_COLORS[i], linestyle='--', linewidth=2.0)
+    # plt.plot([None] * break_val + y[break_val:], label = label + " Post-Cross", color=COLORS[i], linewidth=2.0)
+    # plt.plot(y[:break_val + 1], label = label + " Before", color=LIGHT_COLORS[0], linestyle='--', linewidth=linewidth)
+    # plt.plot([None] * break_val + y[break_val:], label = label + " After", color=COLORS[0], linewidth=linewidth)
+
+    # y, label = ys[1], labels[1]
+
+    # plt.plot(y[:break_val + 1], label = label + " Before", color=LIGHT_COLORS[1], linestyle='--', linewidth=linewidth)
+
 
     if verticalline is not None:
         break_val = verticalline[0]
-        plt.axvline(x=break_val, color='k', linestyle='--', linewidth=2.0, label="Crossing Point")
+        plt.axvline(x=break_val, color='k', linestyle='--', linewidth=linewidth, label="Doorway")
+
+    # plt.plot([None] * break_val + y[break_val:], label = label + " After", color=COLORS[1], linewidth=linewidth)
 
     if ylims is not None:
         plt.ylim(ylims)
 
     if add_dotted is not None:
         val, label = add_dotted
-        plt.plot([val if i is not None else None for i in ys[0]], label=label, linestyle='--', color='red')
+        plt.plot([val if i is not None else None for i in ys[0]], label=label, linewidth=linewidth, linestyle='--', color='red')
 
     # if verticalline is not None:
         # val, label = verticalline
@@ -75,7 +92,12 @@ def gen_figure(ys, title, labels, ylabel, filesuffix, ylims=None, add_dotted=Non
 
     plt.ylabel(ylabel)
     plt.xlabel('Iteration')
-    plt.legend(loc='upper right', prop={'size': 12})
+    print(plt.gcf().get_size_inches())
+    # plt.gcf().set_size_inches(7.2, 4.8)
+    print(plt.gcf().get_dpi())
+    plt.gcf().set_dpi(300)
+    # plt.legend(bbox_to_anchor=(0.0, 1.0), loc='lower left', prop={'size': 15}, ncol=3, columnspacing=1.0)
+    plt.legend(loc='lower left', prop={'size': 15})
     plt.tight_layout()
 
     plt.savefig(f'experiment_results/histories/{RUN_AGENT}_{SCENARIO}_{filesuffix}.png')
@@ -141,7 +163,7 @@ liveness_ylim = 0.6 if SCENARIO == "Doorway" else 5.0
 
 # first_name = "Faster" if first_reached_goal < second_reached_goal else "Slower"
 # second_name = "Slower" if first_reached_goal < second_reached_goal else "Faster"
-gen_figure([vels_0, vels_1], "Agent Velocity", [f'Agent 1', f'Agent 2'], "Agent Velocity (m/s)", "velocities", verticalline=(liveness_last_idx, "Last Intersecting Trajectories"))
+gen_figure([vels_0, vels_1], "Agent Velocity", [f'A1', f'A2'], "Agent Velocity (m/s)", "velocities", verticalline=(liveness_last_idx, "Last Intersecting Trajectories"))
 gen_figure([obs_dist_vals_0, obs_dist_vals_1, opp_dist_vals], "Distance CBF Violation", [f'Agent 1 Static Obstacle Distance', f'Agent 2 Static Obstacle Distance', 'Inter-Agent Distance'],  "Distance (m)", "distance_cbf", add_dotted=(0, 'CBF Boundary'), ylims=[-0.2, np.max([obs_dist_vals_0, obs_dist_vals_1, opp_dist_vals])])
 gen_figure([liveness_cbf_vals], "Liveness CBF Violation", [f'Agent Liveness'],  "Liveness (s)", "liveness_cbf", add_dotted=(0, 'CBF Boundary'), ylims=[-0.2, liveness_ylim])
 gen_traj_plot([desired0, desired1], [traj0, traj1], [f"Agent 1", f"Agent 2"], "Desired vs. Taken Trajectories", "desired")
