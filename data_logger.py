@@ -103,7 +103,6 @@ class DataGenerator:
             for iteration in data_stream['iterations']:
                 for agent_idx in agent_idxs:
                     if 'use_for_training' in iteration and not iteration['use_for_training'][agent_idx]:
-                        # print("DONT USE", self.filenames[self.data_streams.index(data_stream)])
                         continue
                     # 4 + 4 = 8 inputs.
                     inputs = iteration['states'][agent_idx] + iteration['states'][1 - agent_idx]
@@ -131,7 +130,6 @@ class DataGenerator:
                     data.append(np.array(inputs))
         data = np.array(data)
         print(f"Num unlive: {num_unlive}, total count: {total_count}")
-        # print(1/0)
 
         if not normalize:
             return data, np.zeros(data.shape[1]), np.ones(data.shape[1])

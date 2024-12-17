@@ -93,8 +93,6 @@ class MPC:
         if config.obstacle_avoidance:
             self.add_cbf_constraints(mpc)
 
-        # if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR and config.liveliness and self.agent_idx == 1:
-        #     self.add_liveliness_constraint(mpc)
         if config.dynamics == DynamicsModel.DOUBLE_INTEGRATOR and config.liveliness:
             self.add_liveliness_constraint(mpc)
 
@@ -133,13 +131,6 @@ class MPC:
                       config.agent_radius)
             h_k = self.h_obs(self.model.x['x'], obs)
             h_k1 = self.h_obs(x_k1, opp_k1)
-
-            # next_state_debug = np.array(self.initial_state[:2]) + np.array([np.cos(self.initial_state[2]), np.sin(self.initial_state[2])]) * self.initial_state[3] * config.MPC_Ts
-            # h_k_debug = self.h_obs(self.initial_state, obs)
-            # h_k1_debug = self.h_obs(next_state_debug, opp_k1)
-            # print(f"\nAgent idx: {self.agent_idx}")
-            # print(f"\tInitial state: {self.initial_state}, Obs: {obs}, H_k: {h_k_debug}")
-            # print(f"\tNext ego: {next_state_debug}, next opp: {opp_k1}, H_k1: {h_k1_debug}")
 
             # delta_h_k + gamma*h_k >= 0
             # h_k1 - h_k + gamma*h_k >= 0
@@ -190,8 +181,6 @@ class MPC:
         else:
             if is_live:
                 return
-
-        # print(f"Adding constraint, liveliness = {l}, intersecting = {intersecting}")
 
         # Get state vector x_{t+k+1}
         A, B = self.env.get_dynamics(self.model.x['x'])
@@ -249,7 +238,6 @@ class MPC:
         if intersection is None:
             return None
 
-        # d0 = sqrt((x[0] - intersection[0]) ** 2.0 + (x[1] - intersection[1]) ** 2.0)
         d0_reg = np.linalg.norm(initial_closest_to_opp - intersection)
         d1 = np.linalg.norm(opp_closest_to_initial - intersection)
         should_go_faster = (config.mpc_p0_faster and self.agent_idx == 0) or (not config.mpc_p0_faster and self.agent_idx == 1)
@@ -258,21 +246,15 @@ class MPC:
         d0 -= x[3]*ts
         d0_reg -= self.initial_state[3]*ts
 
+
         if should_go_faster:
-            # h = d1 / opp_state[3] - d0 / x[3]
+            # d1 / opp_state[3] - d0 / x[3] >= 0
+            # --> d1 * x[3] - d0 * opp_state[3] >= 0
             h = (d1 * x[3] - d0 * opp_state[3])
         else:
-            # h = d0 / x[3] - d1 / opp_state[3]
-            # print(h, d0_reg / self.initial_state[3] - d1 / opp_state[3])
+            # d0 / x[3] - d1 / opp_state[3] >= 0
+            # --> d0 * opp_state[3] - d1 * x[3] >= 0
             h = (d0 * opp_state[3] - d1 * x[3])
-
-            # if ts == 0:
-            #     print("Closest points:", initial_closest_to_opp, opp_closest_to_initial)
-            #     print("Intersection:", intersection)
-            #     print(f"D0 orig: {d0_reg}, D1 orig: {d1}")
-
-            # if ts == 0:
-            #     print("CBF:", d0_reg * opp_state[3] - d1 * self.initial_state[3])
 
         return h
 

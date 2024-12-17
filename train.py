@@ -6,16 +6,9 @@ import shutil
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from model_utils import ModelDefinition
-from models import BarrierNet
+from model import LiveNet
 from data_logger import DataGenerator, Dataset
 from sklearn.model_selection import train_test_split
-
-def sidloss(model, loss_fn, pred, y):
-    unnorm_pred = pred * model.output_std + model.output_mean
-    sid = torch.sum(torch.nn.functional.relu(torch.abs(unnorm_pred[:, 1]) - config.accel_limit * 2.0))
-    loss = loss_fn(pred, y) + sid
-    return loss, loss_fn(pred, y), sid
-
 
 def train(dataloader, model, loss_fn, optimizer, losses):
     size = len(dataloader.dataset)
@@ -28,7 +21,6 @@ def train(dataloader, model, loss_fn, optimizer, losses):
         # Compute prediction error
         pred = model(X, 1)
         loss = loss_fn(pred, y)
-        # loss, aloss, bloss = sidloss(model, loss_fn, pred, y)
         train_loss += loss.item()
 
         if torch.isnan(loss):
@@ -54,29 +46,19 @@ def train(dataloader, model, loss_fn, optimizer, losses):
     return losses
 
 def test(dataloader, model, loss_fn, losses):
-    config.logging2 = True
     num_batches = len(dataloader)
     model.eval()
     test_loss = 0
-    # alosscum = 0
-    # blosscum = 0
     with torch.no_grad():
         for X, y in dataloader:
             X, y = X.to(config.device), y.to(config.device)
 
             pred = model(X, 1)
             loss = loss_fn(pred, y)
-            # loss, aloss, bloss = sidloss(model, loss_fn, pred, y)
-            # alosscum += aloss
-            # blosscum += bloss
             test_loss += loss.item()
 
     test_loss /= num_batches
-    # alosscum /= num_batches
-    # blosscum /= num_batches
     losses.append(test_loss)
-    # print(f"Test avg loss: {test_loss:>8f}, Reg avg loss: {alosscum}, Sid avg los: {blosscum}  \n")
-    config.logging2 = False
     print(f"Test avg loss: {test_loss:>8f} \n")
     return losses
 
@@ -91,15 +73,6 @@ if __name__ == "__main__":
     norm_outputs, output_mean, output_std = generator.get_outputs(agent_idxs=config.agents_to_train_on, normalize=True)
 
     X_train, X_test, y_train, y_test = train_test_split(norm_inputs, norm_outputs, test_size=0.25, random_state=42, shuffle=True)
-    # X_train, X_test, y_train, y_test = train_test_split(norm_inputs, norm_outputs, test_size=0.25, random_state=42, shuffle=False)
-    # print("ALL INPUTS")
-    # print(norm_inputs[:10] * input_std + input_mean)
-    # print("TRAIN INPUTS")
-    # print(X_train[:10] * input_std + input_mean)
-    # print("TEST INPUTS")
-    # print(X_test[:10] * input_std + input_mean)
-    # print(1/0)
-
     print("Train size:", len(X_train), "Test size:", len(X_test))
 
     # Generators
@@ -110,7 +83,6 @@ if __name__ == "__main__":
     test_dataloader = torch.utils.data.DataLoader(testing_set, **params)
 
     model_definition = ModelDefinition(
-        is_barriernet=config.use_barriernet,
         weights_path=None,
         nHidden1=config.nHidden1,
         nHidden21=config.nHidden21,
@@ -120,7 +92,6 @@ if __name__ == "__main__":
         input_std=input_std.tolist(),
         label_mean=output_mean.tolist(),
         label_std=output_std.tolist(),
-        add_control_limits=config.add_control_limits,
         add_liveness_filter=config.add_liveness_filter,
         separate_penalty_for_opp=config.separate_penalty_for_opp,
         x_is_d_goal=config.x_is_d_goal,
@@ -134,7 +105,7 @@ if __name__ == "__main__":
         sep_pen_for_each_obs=config.sep_pen_for_each_obs
     )
 
-    model = BarrierNet(model_definition).to(config.device)
+    model = LiveNet(model_definition).to(config.device)
     print(model)
     print(list(model.parameters()))
     print(model_definition)
@@ -144,7 +115,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     loss_fn = torch.nn.MSELoss()
 
-    saveprefix = config.saveprefix + ('_bn' if config.use_barriernet else '_fc')
+    saveprefix = config.saveprefix
     weights_path = saveprefix + '.pth'
     model_definition.weights_path = os.path.basename(weights_path)
     best_training_epoch = None
@@ -182,12 +153,8 @@ if __name__ == "__main__":
             ctrl = model(x, 0)
             
             unnorm_ctrl = ctrl * output_std + output_mean
-            if config.use_barriernet:
-                ctrl1.append(unnorm_ctrl[0])
-                ctrl2.append(unnorm_ctrl[1])
-            else:
-                ctrl1.append(unnorm_ctrl[0,0].item())
-                ctrl2.append(unnorm_ctrl[0,1].item())
+            ctrl1.append(unnorm_ctrl[0])
+            ctrl2.append(unnorm_ctrl[1])
             unnorm_y = y * output_std + output_mean
             ctrl1_real.append(unnorm_y[0])
             ctrl2_real.append(unnorm_y[1])
@@ -196,16 +163,14 @@ if __name__ == "__main__":
 
     print("Test done!")
 
-    savefolder = f"train_results/{config.saveprefix.lstrip('weights/')}/"
+    savefolder = f"training_results/{config.saveprefix.lstrip('weights/')}/"
     if os.path.exists(savefolder):
         shutil.rmtree(savefolder, ignore_errors=True)
     os.mkdir(savefolder)
     config_json = {
         'description': config.description,
-        'use_barriernet': config.use_barriernet,
         'agents_to_train_on': config.agents_to_train_on,
         'train_data_paths': config.train_data_paths,
-        'add_control_limits': config.add_control_limits,
         'separate_penalty_for_opp': config.separate_penalty_for_opp,
         'add_liveness_filter': config.add_liveness_filter,
         'x_is_d_goal': config.x_is_d_goal,

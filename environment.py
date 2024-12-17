@@ -140,8 +140,6 @@ class Environment:
         use_for_training = []
         compute_times = []
         for agent_idx in range(self.num_agents):
-            # config.logging = agent_idx == 1
-            # print(f"\nRunning Agent: {agent_idx}")
             controller = controllers[agent_idx]
             initial_state = self.initial_states[agent_idx, :]
             opp_state = self.initial_states[1-agent_idx, :].copy()
@@ -157,7 +155,6 @@ class Environment:
             x1 = self.simulator.make_step(u1)
             new_states[agent_idx, :] = self.apply_state_lims(x1.ravel())
             outputted_controls[agent_idx, :] = u1.ravel()
-            # print(f"Initial state: {initial_state}, Output control: {outputted_controls[agent_idx, :]}, New state: {new_states[agent_idx, :]}")
             use_for_training.append(controller.use_for_training)
 
         # if sim_time >= abs(config.agent_zero_offset):

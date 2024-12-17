@@ -1,18 +1,9 @@
-"""Game theoretic MPC-CBF controller for a differential drive mobile robot."""
-
-# State: [x, y, theta], Position: [x, y]
-# x1 and x2 are time series states of agents 1 and 2 respectively
-# n is the number of agents
-# N is number of iterations for one time horizon
-# mpc_cbf.py containst eh code for the Game thereotic MPC controllers for agent 1 and 2 respectively
-
 import os
-import matplotlib.pyplot as plt
 import config
 from mpc_cbf import MPC
 from scenarios import DoorwayScenario, NoObstacleDoorwayScenario, IntersectionScenario
 from plotter import Plotter
-from data_logger import DataLogger, BlankLogger
+from data_logger import DataLogger
 from environment import Environment
 from simulation import run_simulation
 
@@ -161,18 +152,10 @@ if SCENARIO == 'Doorway':
         (0.9, 0.2, 0.2, 14.0), # 13 redo
     ]
 
-    scenario_configs = scenario_configs[28:]
-    scenarios = scenarios[28:]
-    best_params = best_params[28:]
-
-    folder_to_save_to = 'doorway_scenario_suite_6/'
+    folder_to_save_to = 'doorway_scenario_suite_5/'
 
 else:
-    folder_to_save_to = 'intersection_scenario_suite3/'
-    # best_params = [
-    # (0.5, 0.3, 0.3, 0.5, True, 14.0), # 0
-    # ]
-    # scenarios = [IntersectionScenario()]
+    folder_to_save_to = 'intersection_scenario_suite2/'
 
     scenario_configs = [
         (0.8, 0.8),
@@ -199,12 +182,9 @@ else:
         (0.6, 0.1, 16.0)
     ]
 
-start_idx, end_idx = 21, 28
-# animations/doorway_scenario_suite_4/s_doorway_-1.0_0.5_2.0_0.15_False_0.3_l_1_faster_off0..mp4
-# start_idx, end_idx = 42, 43
+start_idx, end_idx = 0, 56
 scenarios = scenarios[start_idx:end_idx]
 best_params = best_params[start_idx:end_idx]
-
 
 assert(len(scenarios) == len(best_params))
 
@@ -254,7 +234,6 @@ for scenario, mpc_params in zip(scenarios, best_params):
 
             x_cum, u_cum = run_simulation(scenario, env, controllers, logger, plotter)
             print("Saving scenario to:", log_filename)
-            # plt.close()
 
             metric_data = gather_all_metric_data(scenario, x_cum[0], x_cum[1], scenario.goals, env.compute_history)
             all_metric_data.append(metric_data)

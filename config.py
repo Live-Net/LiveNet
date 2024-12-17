@@ -1,6 +1,5 @@
 """Configurations for the MPC controller."""
 
-import os
 import torch
 import numpy as np
 from enum import Enum, auto
@@ -38,7 +37,6 @@ else:
     num_controls = 2 # (a, omega)
 
 logging = False
-logging2 = False
 n = 2                                      # Number of agents
 runtime = 20.0                             # Total runtime [s]
 sim_ts = 0.2                                # Simulation Sampling time [s]
@@ -77,24 +75,11 @@ COST_MATRICES = {
 }
 
 # Training parameters.
-use_barriernet = True
+train_data_paths = ['datasets/doorway_scenario_suite_5/']
 
-# train_data_paths = ['doorway_scenario_suite/s_-1.0_0.5_2.0_0.15_l_0_faster_off0.json', 'doorway_scenario_suite/s_-1.0_0.4_2.0_0.15_l_0_faster_off0.json', 'doorway_scenario_suite/s_-1.0_0.3_2.0_0.15_l_0_faster_off0.json',
-#                     'doorway_scenario_suite/s_-0.5_0.5_2.0_0.15_l_0_faster_off0.json', 'doorway_scenario_suite/s_-0.5_0.4_2.0_0.15_l_0_faster_off0.json', 'doorway_scenario_suite/s_-0.5_0.3_2.0_0.15_l_0_faster_off0.json', ]
-
-# train_data_paths = ['doorway_scenario_suite/']
-# train_data_paths = ['doorway_scenario_suite2/']
-# train_data_paths = ['doorway_scenario_suite_4/']
-# train_data_paths = ['doorway_scenario_suite_5/']
-train_data_paths = ['doorway_scenario_suite_6/']
-# train_data_paths = ['intersection_scenario_suite2/']
-# train_data_paths = ['intersection_scenario_suite3/']
-
-# agents_to_train_on = [0]
 agents_to_train_on = [0, 1]
 
 # Liveness / CBF Filters (all the cool shit)
-add_control_limits = False
 add_liveness_filter = True
 add_liveness_as_input = False
 fixed_liveness_input = True
@@ -110,7 +95,6 @@ ego_frame_inputs = False
 sep_pen_for_each_obs = False
 
 train_batch_size = 32
-# train_batch_size = 1
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 learning_rate = 1e-3
@@ -120,23 +104,7 @@ nHidden21 = 128
 nHidden22 = 64
 nHidden24 = 64
 
-# l = liveness, nl = no liveness
-# g = goal, ng = no goal
-# saf = trained on both slow and fast variations.
-# wc = with checkpoint
-# 
-# Baseline options: weights/model_base_single_input_obs_wc_nolim_
-# Baseline options: weights/model_base_single_input_obs_wc_nolim_saf_
-# Baseline options: weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1
-# Baseline options: weights/model_base_single_input_obs_wc_nolim_saf_suite_0 and weights/model_base_single_input_obs_wc_nolim_saf_suite_1
-
-# Livenet options: model_base_single_input_obs_wc_nolim_linp_f_fullsuite_0_1_bn_definition
-
-# saveprefix = f'weights/model_base_single_input_obs_wc_nolim_linp_f_fullsuite_live_'
-# saveprefix = f'weights/model_base_input_obs_wc_nolim_saf_intersuite_'
-# saveprefix = f'weights/model_30_norm_doorsuite4_lfnew_nso_nego_'
-saveprefix = f'weights/srikar_iter_8_6nol_suite5_'
-saveprefix += '_'.join([str(i) for i in agents_to_train_on])
-# saveprefix = "weights/test"
+saveprefix = f'weights/model'
+saveprefix += '_' + '_'.join([str(i) for i in agents_to_train_on])
 
 description = "Base model, no limits, no liveness, obs are inputs, run on doorway suite"

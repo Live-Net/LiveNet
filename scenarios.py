@@ -57,8 +57,6 @@ class DoorwayScenario:
             ax.add_patch(circle)
         ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=500)
         ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=500)
-        # ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=100)
-        # ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=100)
 
     def __str__(self):
         return f"Doorway Scenario with config: {self.config}"
@@ -92,8 +90,6 @@ class NoObstacleDoorwayScenario:
         self.obstacles = []
     
     def plot(self, ax):
-        # ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=100)
-        # ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=100)
         ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=1500)
         ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=1500)
 
@@ -130,26 +126,6 @@ class IntersectionScenario:
             ax.add_patch(circle)
         ax.scatter(self.goals[0, 0], self.goals[0, 1], c='r', marker='x', s=500)
         ax.scatter(self.goals[1, 0], self.goals[1, 1], c='b', marker='x', s=500)
-
-
-        # length=1
-        # ox, ox1 = self.ox, self.ox1
-        # rect = patches.Rectangle((ox-0.1,-length),0.2,1-ox1+0.1,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect1 = patches.Rectangle((ox1-0.1,-length),0.2,1-ox1+0.1,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect2 = patches.Rectangle((ox1-0.1,ox1),0.2,1-ox1+0.1,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect3 = patches.Rectangle((ox-0.1,ox1),0.2,1-ox1+0.1,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect4 = patches.Rectangle((-length,ox-0.1),1-ox1+0.1,0.2,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect5 = patches.Rectangle((-length,ox1-0.1),1-ox1+0.1,0.2,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect6 = patches.Rectangle((ox1-0.1,ox1-0.1),1-ox1+0.2,0.2,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # rect7 = patches.Rectangle((ox1,ox-0.1),1-ox1+0.1,0.2,linewidth=1,edgecolor='k',facecolor='k',fill=True)
-        # ax.add_patch(rect)
-        # ax.add_patch(rect1)
-        # ax.add_patch(rect2)
-        # ax.add_patch(rect3)
-        # ax.add_patch(rect4)
-        # ax.add_patch(rect5)
-        # ax.add_patch(rect6)
-        # ax.add_patch(rect7)
     
     def __str__(self):
         return f"Intersection Scenario with config {self.config}"

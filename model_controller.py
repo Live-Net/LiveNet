@@ -2,15 +2,15 @@ import torch
 import config
 import numpy as np
 from model_utils import ModelDefinition
-from models import BarrierNet
-from util import perturb_model_input, axay_to_aw_control
+from model import LiveNet
+from util import perturb_model_input
 
 
 class ModelController:
     def __init__(self, model_definition_filepath, goal, static_obs):
         self.model_definition = ModelDefinition.from_json(model_definition_filepath)
         self.goal = goal
-        self.model = BarrierNet(self.model_definition).to(config.device)
+        self.model = LiveNet(self.model_definition).to(config.device)
         self.static_obs = static_obs
         print(self.model_definition.weights_path)
         self.model.load_state_dict(torch.load(self.model_definition.weights_path))
@@ -47,10 +47,7 @@ class ModelController:
             model_input = torch.autograd.Variable(torch.from_numpy(model_input), requires_grad=False)
             model_input = torch.reshape(model_input, (1, self.model_definition.get_num_inputs())).to(config.device)
             model_output = self.model(model_input, 0)
-            if self.model_definition.is_barriernet:
-                model_output = np.array([model_output[0], model_output[1]])
-            else:
-                model_output = model_output.reshape(-1).cpu().detach().numpy()
+            model_output = np.array([model_output[0], model_output[1]])
 
         output = model_output * self.model_definition.label_std + self.model_definition.label_mean
         # print("Outputted controls:", output)

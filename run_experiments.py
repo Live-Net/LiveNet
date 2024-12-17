@@ -1,11 +1,3 @@
-"""Game theoretic MPC-CBF controller for a differential drive mobile robot."""
-
-# State: [x, y, theta], Position: [x, y]
-# x1 and x2 are time series states of agents 1 and 2 respectively
-# n is the number of agents
-# N is number of iterations for one time horizon
-# mpc_cbf.py containst eh code for the Game thereotic MPC controllers for agent 1 and 2 respectively
-
 import config
 import numpy as np
 from metrics import gather_all_metric_data, load_desired_path
@@ -15,10 +7,9 @@ from data_logger import BlankLogger, DataLogger
 from environment import Environment
 from model_controller import ModelController
 from simulation import run_simulation
-from plotter import Plotter
 
-# SCENARIO = 'Doorway'
-SCENARIO = 'Intersection'
+SCENARIO = 'Doorway'
+# SCENARIO = 'Intersection'
 
 # RUN_AGENT = 'MPC'
 # RUN_AGENT = 'MPC_UNLIVE'
@@ -69,24 +60,21 @@ def get_mpc_unlive_controllers(scenario):
 
 def get_barriernet_controllers(scenario):
     if SCENARIO == 'Doorway':
-        model_0_def = "weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1_bn_definition.json"
-        model_1_def = "weights/model_base_single_input_obs_wc_nolim_saf_suite_0_1_bn_definition.json"
+        model_def = "weights/barriernet_doorway_definition.json"
     elif SCENARIO == 'Intersection':
-       model_0_def = "weights/model_base_input_obs_wc_nolim_saf_intersuite_0_1_bn_definition.json"
-       model_1_def = "weights/model_base_input_obs_wc_nolim_saf_intersuite_0_1_bn_definition.json"
+       model_def = "weights/barriernet_intersection_definition.json"
 
     controllers = [
-        ModelController(model_0_def, scenario.goals[0], scenario.obstacles.copy()),
-        ModelController(model_1_def, scenario.goals[1], scenario.obstacles.copy()),
+        ModelController(model_def, scenario.goals[0], scenario.obstacles.copy()),
+        ModelController(model_def, scenario.goals[1], scenario.obstacles.copy()),
     ]
     return controllers
 
 def get_livenet_controllers(scenario, scenario_type=SCENARIO):
     if scenario_type == 'Doorway':
-        # model_def = "weights/model_30_norm_doorsuite2_lf_0_1_bn_definition.json"
-        model_def = "weights/model_30_norm_doorsuite2_lfnew_0_1_bn_definition.json"
+        model_def = "weights/livenet_doorway_definition.json"
     elif scenario_type == 'Intersection':
-        model_def = "weights/model_30_norm_intersuite2_lfnew_so_ego_0_1_bn_definition.json"
+        model_def = "weights/livenet_intersection_definition.json"
     else:
         raise ValueError(f"Scenario {scenario_type} not found!")
     print(model_def)
@@ -113,6 +101,7 @@ if __name__ == '__main__':
 
     all_metric_data = []
     for sim in range(NUM_SIMS if SIM_RESULTS_MODE else 1):
+        print(f"Running simulation {sim+1} of {NUM_SIMS if SIM_RESULTS_MODE else 1}")
         plotter = None
         logger = BlankLogger() if SIM_RESULTS_MODE else DataLogger(f"experiment_results/histories/{RUN_AGENT}_{SCENARIO}.json")
 

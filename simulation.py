@@ -13,7 +13,6 @@ def run_simulation(scenario, env, controllers, logger, plotter):
     controllers[1].initialize_controller(env)
 
     for sim_iteration in range(int(config.runtime / config.sim_ts)):
-        # print("\nIteration:", sim_iteration)
         for agent_idx in range(config.n):
             x_cum[agent_idx].append(env.initial_states[agent_idx])
 

@@ -1,8 +1,7 @@
 import config
 import numpy as np
-from metrics import check_when_reached_goal, get_straight_line_desired_path
+from metrics import check_when_reached_goal
 from data_logger import DataLogger
-from run_experiments import get_scenario
 from util import get_ray_intersection_point
 import matplotlib.pyplot as plt
 

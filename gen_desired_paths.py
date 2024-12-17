@@ -1,11 +1,3 @@
-"""Game theoretic MPC-CBF controller for a differential drive mobile robot."""
-
-# State: [x, y, theta], Position: [x, y]
-# x1 and x2 are time series states of agents 1 and 2 respectively
-# n is the number of agents
-# N is number of iterations for one time horizon
-# mpc_cbf.py containst eh code for the Game thereotic MPC controllers for agent 1 and 2 respectively
-
 import config
 from plotter import Plotter
 from data_logger import DataLogger
@@ -13,7 +5,6 @@ from environment import Environment
 from blank_controller import BlankController
 from simulation import run_simulation
 from mpc_cbf import MPC
-from metrics import get_straight_line_desired_path
 from run_experiments import get_mpc_live_controllers, get_scenario, get_livenet_controllers
 
 NUM_AGENTS = 2
